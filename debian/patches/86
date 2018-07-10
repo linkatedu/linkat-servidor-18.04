@@ -1,0 +1,518 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-86) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2019-04-24
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/ldap/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/ldap/tasks/main.yml
+@@ -61,6 +61,12 @@
+ - name: Copiant fitxers de configuració APPARMOR
+   copy: src=files/usr.sbin.clamd dest=/etc/apparmor.d/usr.sbin.clamd
+ 
++- name: Copiant fitxers de configuració APPARMOR
++  copy: src=files/usr.sbin.cupsd dest=/etc/apparmor.d/usr.sbin.cupsd
++
++- name: Copiant fitxers de configuració APPARMOR
++  copy: src=files/usr.sbin.ntpd dest=/etc/apparmor.d/usr.sbin.ntpd
++
+ - file:
+         path: /usr/share/lightdm/lightdm.conf.d/80-linkat-server-lightdm.conf
+         owner: root
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/unitats/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/unitats/tasks/main.yml
+@@ -5,7 +5,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 0555
++        mode: 00555
+ 
+ - name: Verificant unitat P
+   file:
+@@ -13,7 +13,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6770
++        mode: 06770
+ 
+ - name: Verificant unitats S
+   file:
+@@ -21,7 +21,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6775
++        mode: 06775
+ 
+ - name: Verificant unitats T
+   file:
+@@ -29,7 +29,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 0777
++        mode: 00777
+ 
+ - name: Verificant unitats M
+   file:
+@@ -37,7 +37,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6770
++        mode: 06770
+ 
+ - name: Verificant unitats G
+   file:
+@@ -45,7 +45,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6770
++        mode: 06770
+ 
+ - name: Verificant Paperera
+   file:
+@@ -53,7 +53,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6775
++        mode: 02775
+ 
+ - name: Verificant Paperera P
+   file:
+@@ -61,7 +61,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 0770
++        mode: 00770
+ 
+ #- name: Verificant Paperera S
+ #  file:
+@@ -69,7 +69,7 @@
+ #        state: directory
+ #        owner: root
+ #        group: root
+-#        mode: 0644
++#        mode: 00644
+ 
+ - name: Verificant Paperera T
+   file:
+@@ -77,7 +77,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 0775
++        mode: 00775
+ 
+ - name: Verificant Paperera M
+   file:
+@@ -85,7 +85,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 0770
++        mode: 00770
+ 
+ - name: Verificant Paperera G
+   file:
+@@ -93,7 +93,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 0770
++        mode: 00770
+ 
+ - name: Verificant Quarantine
+   file:
+@@ -101,7 +101,7 @@
+         state: directory
+         owner: clamav
+         group: root
+-        mode: 0770
++        mode: 00770
+ 
+ - name: Verificant unitat Arxius
+   file:
+@@ -109,7 +109,7 @@
+         state: directory
+         owner: lnadmin 
+         group: root
+-        mode: 6770
++        mode: 06770
+ 
+ - name: Verificant unitat CloudPrint
+   file:
+@@ -117,7 +117,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6770
++        mode: 06770
+ 
+ - name: Verificant unitats Maquetes
+   file:
+@@ -125,7 +125,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6770
++        mode: 06770
+ 
+ - name: Verificant unitats FOG 
+   file:
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/programari.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/programari.conf
+@@ -5,9 +5,9 @@
+    browseable = Yes
+    guest ok = Yes
+    printable = No
+-   force create mode = 664
++   force create mode = 775
+    force directory mode = 775
+-   create mask = 664
++   create mask = 775
+ 
+ [S]
+    comment = Programari
+@@ -16,6 +16,6 @@
+    browseable = no
+    guest ok = Yes
+    printable = No
+-   force create mode = 664
++   force create mode = 775
+    force directory mode = 775
+-   create mask = 664
++   create mask = 775
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/usr.sbin.cupsd
+@@ -0,0 +1,213 @@
++# vim:syntax=apparmor
++# Last Modified: Thu Aug  2 12:54:46 2007
++# Author: Martin Pitt <martin.pitt@ubuntu.com>
++
++#include <tunables/global>
++
++/usr/sbin/cupsd flags=(attach_disconnected) {
++  #include <abstractions/base>
++  #include <abstractions/bash>
++  #include <abstractions/authentication>
++  #include <abstractions/dbus>
++  #include <abstractions/fonts>
++  #include <abstractions/nameservice>
++  #include <abstractions/perl>
++  #include <abstractions/user-tmp>
++
++  capability chown,
++  capability fowner,
++  capability fsetid,
++  capability kill,
++  capability net_bind_service,
++  capability setgid,
++  capability setuid,
++  capability audit_write,
++  capability wake_alarm,
++  deny capability block_suspend,
++
++  # noisy
++  deny signal (send) set=("term") peer=unconfined,
++
++  # nasty, but we limit file access pretty tightly, and cups chowns a
++  # lot of files to 'lp' which it cannot read/write afterwards any
++  # more
++  capability dac_override,
++  capability dac_read_search,
++
++  # the bluetooth backend needs this
++  network bluetooth,
++
++  # the dnssd backend uses those
++  network x25 seqpacket,
++  network ax25 dgram,
++  network netrom seqpacket,
++  network rose dgram,
++  network ipx dgram,
++  network appletalk dgram,
++  network econet dgram,
++  network ash dgram,
++
++  /{usr/,}bin/bash ixr,
++  /{usr/,}bin/dash ixr,
++  /{usr/,}bin/hostname ixr,
++  /dev/lp* rw,
++  deny /dev/tty rw,  # silence noise
++  /dev/ttyS* rw,
++  /dev/ttyUSB* rw,
++  /dev/usb/lp* rw,
++  /dev/bus/usb/ r,
++  /dev/bus/usb/** rw,
++  /dev/parport* rw,
++  /etc/cups/ rw,
++  /etc/cups/** rw,
++  /etc/cups/interfaces/* ixrw,
++  /etc/foomatic/* r,
++  /etc/gai.conf r,
++  /etc/papersize r,
++  /etc/pnm2ppa.conf r,
++  /etc/printcap rwl,
++  /etc/ssl/** r,
++  @{PROC}/net/ r,
++  @{PROC}/net/* r,
++  @{PROC}/sys/dev/parport/** r,
++  @{PROC}/*/net/ r,
++  @{PROC}/*/net/** r,
++  @{PROC}/*/auxv r,
++  @{PROC}/sys/crypto/** r,
++  /sys/** r,
++  /usr/bin/* ixr,
++  /usr/sbin/* ixr,
++  /{usr/,}bin/* ixr,
++  /{usr/,}sbin/* ixr,
++  /usr/lib/** rm,
++
++  # backends which come with CUPS can be confined
++  /usr/lib/cups/backend/bluetooth ixr,
++  /usr/lib/cups/backend/dnssd ixr,
++  /usr/lib/cups/backend/http ixr,
++  /usr/lib/cups/backend/ipp ixr,
++  /usr/lib/cups/backend/lpd ixr,
++  /usr/lib/cups/backend/mdns ixr,
++  /usr/lib/cups/backend/parallel ixr,
++  /usr/lib/cups/backend/serial ixr,
++  /usr/lib/cups/backend/snmp ixr,
++  /usr/lib/cups/backend/socket ixr,
++  /usr/lib/cups/backend/usb ixr,
++
++  # we treat cups-pdf specially, since it needs to write into /home
++  # and thus needs extra paranoia
++  /usr/lib/cups/backend/cups-pdf Px,
++
++  # allow communicating with cups-pdf via Unix sockets
++  unix peer=(label=/usr/lib/cups/backend/cups-pdf),
++
++  # third party backends get no restrictions as they often need high
++  # privileges and this is beyond our control
++  /usr/lib/cups/backend/* Cx -> third_party,
++
++  /usr/lib/cups/cgi-bin/* ixr,
++  /usr/lib/cups/daemon/* ixr,
++  /usr/lib/cups/monitor/* ixr,
++  /usr/lib/cups/notifier/* ixr,
++  # filters and drivers (PPD generators) are always run as non-root,
++  # and there are a lot of third-party drivers which we cannot predict
++  /usr/lib/cups/filter/** Cxr -> third_party,
++  /usr/lib/cups/driver/* Cxr -> third_party,
++  /usr/local/** rm,
++  /usr/local/lib/cups/** rix,
++  /usr/share/** r,
++  /{,var/}run/** rm,
++  /{,var/}run/avahi-daemon/socket rw,
++  deny /{,var/}run/samba/ rw,
++  /{,var/}run/samba/** rw,
++  /var/cache/samba/*.tdb r,
++  /var/{cache,lib}/samba/printing/printers.tdb r,
++  /{,var/}run/cups/ rw,
++  /{,var/}run/cups/** rw,
++  /var/cache/cups/ rw,
++  /var/cache/cups/** rwk,
++  /var/log/cups/ rw,
++  /var/log/cups/* rw,
++  /var/spool/cups/ rw,
++  /var/spool/cups/** rw,
++
++  # third-party printer drivers; no known structure here
++  /opt/** rix,
++
++  # FIXME: no policy ATM for hplip and Brother drivers
++  /usr/bin/hpijs Cx -> third_party,
++  /usr/Brother/** Cx -> third_party,
++
++  # Kerberos authentication
++  /etc/krb5.conf r,
++  deny /etc/krb5.conf w,
++  /etc/krb5.keytab rk,
++  /etc/cups/krb5.keytab rwk,
++  /tmp/krb5cc* k,
++
++  # likewise authentication
++  /etc/likewise r,
++  /etc/likewise/* r,
++
++  # silence noise
++  deny /etc/udev/udev.conf r,
++
++  signal peer=/usr/sbin/cupsd//third_party,
++  unix peer=(label=/usr/sbin/cupsd//third_party),
++  profile third_party flags=(attach_disconnected) {
++    # third party backends, filters, and drivers get relatively no restrictions
++    # as they often need high privileges, are unpredictable or otherwise beyond
++    # our control
++    file,
++    capability,
++    audit deny capability mac_admin,
++    network,
++    dbus,
++    signal,
++    ptrace,
++    unix,
++  }
++
++  # Site-specific additions and overrides. See local/README for details.
++  #include <local/usr.sbin.cupsd>
++}
++
++# separate profile since this needs to write into /home
++/usr/lib/cups/backend/cups-pdf {
++  #include <abstractions/base>
++  #include <abstractions/fonts>
++  #include <abstractions/nameservice>
++  #include <abstractions/user-tmp>
++
++  capability chown,
++  capability fowner,
++  capability fsetid,
++  capability setgid,
++  capability setuid,
++
++  # unfortunate, but required for when $HOME is 700
++  capability dac_override,
++  capability dac_read_search,
++
++  # allow communicating with cupsd via Unix sockets
++  unix peer=(label=/usr/sbin/cupsd),
++
++  @{PROC}/*/auxv r,
++
++  /{usr/,}bin/dash ixr,
++  /{usr/,}bin/bash ixr,
++  /{usr/,}bin/cp ixr,
++  /etc/papersize r,
++  /etc/cups/cups-pdf.conf r,
++  /etc/cups/ppd/*.ppd r,
++  /srv/exports/cloudprint/ rw,
++  /srv/exports/cloudprint/* rw,
++  /usr/bin/gs ixr,
++  /usr/lib/cups/backend/cups-pdf mr,
++  /usr/lib/ghostscript/** mr,
++  /usr/share/** r,
++  /var/log/cups/cups-pdf*_log w,
++  /var/spool/cups/** r,
++  /var/spool/cups-pdf/** rw,
++  /etc/ldap/ldap.conf r,
++}
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/usr.sbin.ntpd
+@@ -0,0 +1,90 @@
++# vim:syntax=apparmor
++# Updated for Ubuntu by: Jamie Strandboge <jamie@canonical.com>
++# ------------------------------------------------------------------
++#
++#    Copyright (C) 2002-2005 Novell/SUSE
++#    Copyright (C) 2009-2012 Canonical Ltd.
++#
++#    This program is free software; you can redistribute it and/or
++#    modify it under the terms of version 2 of the GNU General Public
++#    License published by the Free Software Foundation.
++#
++# ------------------------------------------------------------------
++
++#include <tunables/global>
++#include <tunables/ntpd>
++/usr/sbin/ntpd flags=(attach_disconnected) {
++  #include <abstractions/base>
++  #include <abstractions/nameservice>
++  #include <abstractions/user-tmp>
++
++  capability ipc_lock,
++  capability net_bind_service,
++  capability setgid,
++  capability setuid,
++  capability sys_chroot,
++  capability sys_resource,
++  capability sys_time,
++  capability sys_nice,
++
++  # ntp uses AF_INET, AF_INET6 and AF_UNSPEC
++  network dgram,
++  network stream,
++
++  @{PROC}/net/if_inet6 r,
++  @{PROC}/*/net/if_inet6 r,
++  @{NTPD_DEVICE} rw,
++  # pps devices are almost exclusively used with NTP
++  /dev/pps[0-9]* rw,
++
++  /{,s}bin/      r,
++  /usr/{,s}bin/  r,
++  /usr/local/{,s}bin/  r,
++  /usr/sbin/ntpd rmix,
++
++  /etc/ntp.conf r,
++  /etc/ntp.conf.dhcp r,
++  /etc/ntpd.conf r,
++  /etc/ntpd.conf.tmp r,
++  /run/ntp.conf.dhcp r,
++
++  /etc/ntp.keys r,
++  /etc/ntp/** r,
++
++  /etc/ntp.drift rwl,
++  /etc/ntp.drift.TEMP rwl,
++  /etc/ntp/drift* rwl,
++  /var/lib/ntp/*drift rw,
++  /var/lib/ntp/*drift.TEMP rw,
++
++  /var/log/ntp w,
++  /var/log/ntp.log w,
++  /var/log/ntpd w,
++  /var/log/ntpstats/clockstats* rwl,
++  /var/log/ntpstats/loopstats*  rwl,
++  /var/log/ntpstats/peerstats*  rwl,
++  /var/log/ntpstats/protostats* rwl,
++  /var/log/ntpstats/rawstats*   rwl,
++  /var/log/ntpstats/sysstats*   rwl,
++
++  /{,var/}run/ntpd.pid w,
++
++  # to be able to check for running ntpdate
++  /run/lock/ntpdate wk,
++
++  # samba4 ntp signing socket
++  /{,var/}run/samba/ntp_signd/socket rw,
++
++  # samba4 winbindd pipe
++  /run/samba/winbindd/pipe rw,
++
++  # For use with clocks that report via shared memory (e.g. gpsd),
++  # you may need to give ntpd access to all of shared memory, though
++  # this can be considered dangerous. See https://launchpad.net/bugs/722815
++  # for details. To enable, add this to local/usr.sbin.ntpd:
++  #     capability ipc_owner,
++
++  # Site-specific additions and overrides. See local/README for details.
++  #include <local/usr.sbin.ntpd>
++  /etc/ldap/ldap.conf r,
++}
