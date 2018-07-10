@@ -1,0 +1,61 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-45) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-11-02
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/permisos/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/permisos/tasks/main.yml
+@@ -152,3 +152,11 @@
+         owner: root
+         group: Administradors
+         mode: 06770
++
++- name: Verificant unitat remmount
++  file:
++        path: /etc/remmount.d
++        state: directory
++        owner: lnadmin
++        group: root
++        mode: 00775
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -261,7 +261,7 @@ ansible-playbook "$ANSIBLEPLAY"/acl.yml
+ sudo "$FILES_LINKAT"/nextcloud.sh
+ 
+ ## Onlyoffice
+-sudo "$FILES_LINKAT"/onlyoffice.sh
++#sudo "$FILES_LINKAT"/onlyoffice.sh
+ 
+ ## Eliminar Network-Manager
+ killall update-manager update-notifier 2>&1
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/webldap-useradminconfig
++++ linkat-servidor-18.04/linkat-servidor/plantilles/webldap-useradminconfig
+@@ -42,7 +42,7 @@ pre_command=
+ group_base=ou=Groups,dc=__DOMAIN__
+ post_command=
+ other_class=inetOrgPerson
+-base_uid=
++base_uid=2000
+ user_base=ou=People,dc=__DOMAIN__
+ passwd_stars=
+ home_base=
