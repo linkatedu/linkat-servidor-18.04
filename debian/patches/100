@@ -1,0 +1,50 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-100) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2019-07-11
+
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/nextcloud-restart.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/nextcloud-restart.sh
+@@ -8,7 +8,8 @@ if [ $? -gt 0 ]; then
+ else
+ 
+ # Set Apparmour snap permissions to rw
+-sudo sed '/tmp\/snap.*\/ w/ s/w/rw/g' /etc/apparmor.d/usr.lib.snapd.snap-confine.real
++sudo sed -i '/tmp\/snap.*\/ w/ s/w/rw/g' /etc/apparmor.d/usr.lib.snapd.snap-confine.real
++sudo apparmor_parser -r /etc/apparmor.d/usr.lib.snapd.snap-confine.real
+ 
+ # Reconfigure Nextcloud snap
+ sudo nextcloud.enable-https self-signed
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/nextcloud.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/nextcloud.sh
+@@ -1,7 +1,9 @@
+ #!/bin/bash
+ 
+ # Set Apparmor snap permissions to rw
+-sed '/tmp\/snap.*\/ w/ s/w/rw/g' /etc/apparmor.d/usr.lib.snapd.snap-confine.real
++sudo sed -i '/tmp\/snap.*\/ w/ s/w/rw/g' /etc/apparmor.d/usr.lib.snapd.snap-confine.real
++sudo apparmor_parser -r /etc/apparmor.d/usr.lib.snapd.snap-confine.real
++
+ 
+ # Install and Configure Nextcloud via snap
+ sudo snap install nextcloud
