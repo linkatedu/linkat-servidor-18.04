@@ -1,0 +1,85 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-93) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2019-05-22
+
+--- linkat-servidor-18.04.orig/linkat-servidor.desktop
++++ linkat-servidor-18.04/linkat-servidor.desktop
+@@ -1,7 +1,7 @@
+ [Desktop Entry]
+ Name=Linkat servidor
+ Icon=linkat-servidor
+-Exec=sudo /usr/share/linkat/linkat-servidor/linkat-servidor.sh
++Exec=sudo /usr/share/linkat/linkat-servidor/linkat-servidor.install
+ Terminal=true
+ Type=Application
+ StartupNotify=true
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.install
+@@ -0,0 +1,6 @@
++#!/bin/bash
++
++DATE=`date '+%Y-%m-%d_%H:%M:%S'`
++LOGS=/var/log/linkat-servidor-$DATE.log
++
++sudo /usr/share/linkat/linkat-servidor/linkat-servidor.sh | tee $LOGS
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -5,7 +5,6 @@ CONF_FILE=/etc/linkat/linkat-servidor/li
+ PLANTILLES=/usr/share/linkat/linkat-servidor/plantilles
+ FILES_LINKAT=/usr/share/linkat/linkat-servidor/configurador/files
+ ANSIBLEPLAY=/usr/share/linkat/linkat-servidor/configurador
+-LOGS=/var/log/linkat-servidor.log
+ DATE=`date '+%Y-%m-%d_%H:%M:%S'`
+ 
+ if [ -f "$CONF_FILE" ]; then
+@@ -198,8 +197,6 @@ sed -i s/__IP2__/"$IP2"/g *
+ sed -i s/__IP3__/"$IP3"/g *
+ sed -i s/__IP4__/"$IP4"/g *
+ 
+-echo "$DATE" >> "$LOGS"
+-
+ ## Nou passwd de l'usuari lnadmin i root
+ echo "lnadmin:$NEW_PASSLNADMIN1" | chpasswd
+ 
+@@ -240,7 +237,7 @@ ansible-playbook "$ANSIBLEPLAY"/server.y
+ 
+ ## Configurant servidor LDAP
+ cd "$FILES_LINKAT"/
+-sudo "$FILES_LINKAT"/ldap.sh 
++sudo "$FILES_LINKAT"/ldap.sh
+ check_errors ldap
+ 
+ sudo "$FILES_LINKAT"/ldap-auth.sh
+@@ -248,9 +245,9 @@ check_errors ldap-auth
+ 
+ ## Configuració servidor SAMBA
+ ansible-playbook "$ANSIBLEPLAY"/smb.yml
+-sudo "$FILES_LINKAT"/ldap-samba.sh 
++sudo "$FILES_LINKAT"/ldap-samba.sh
+ check_errors ldap-samba
+-sudo "$FILES_LINKAT"/smbldap-populate.sh 
++sudo "$FILES_LINKAT"/smbldap-populate.sh
+ check_errors populate
+ 
+ ## Copy Jclic Projects
