@@ -1,0 +1,116 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-22) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-08-28
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/nfs/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/nfs/tasks/main.yml
+@@ -2,12 +2,15 @@
+ - name: Copiant fitxers de configuració NFS
+   copy: src=files/exports dest=/etc/exports
+ 
++- name: Copiant fitxers de configuració NFS
++  copy: src=files/nfs-kernel-server dest=/etc/default/nfs-kernel-server
++
+ - file:
+         path: /etc/exports
+         owner: root
+         group: root
+         mode: 0644
+ 
+-#- name: Activant servei NFS
+-#  service: name=nfs-server state=started enabled=yes
+-#  notify: restart nfs-server
++- name: Activant servei NFS
++  service: name=nfs-kernel-server state=started enabled=yes
++  notify: restart nfs-server
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -71,7 +71,7 @@ check_pass()
+ 
+ formulari()
+ {
+-res=$(yad --width=400 --title="Linkat Servidor de centre" --text="\nIntroduexi els valors per configurar el sevidor de centre\nTots els camps són obligatoris\n\nConfiguracions del servidor:\n" \
++res=$(yad --width=400 --title="Linkat Servidor de centre" --text="\nIntroduïu els valors per configurar el sevidor de centre.\nCal emplenar tots els camps.\n\nConfiguracions del servidor:\n" \
+ --image="/usr/share/linkat/linkat-servidor/linkat-servidor-banner.png" \
+ --form --item-separator=" " \
+ --field="Nom del servidor" \
+@@ -111,7 +111,7 @@ NEW_PASSLNADMIN2=$(echo "$res" | awk -F"
+ 
+ validar_formulari()
+ {
+-yad --width=400 --title="Linkat Servidor de centre" --text="\nSón correctes les dades següents?\n\nServidor: $NEW_NAME\nDomini: $NEW_DOMAIN\nDispositiu: $NEW_DEV\nIP: $NEW_IP\nMàscara: $NEW_MASK\nPassarel·la: $NEW_GW\nDNS Primària: $NEW_DNS1\nDNS Secundària: $NEW_DNS2" \
++yad --width=400 --title="Linkat Servidor de centre" --text="\nLes dades següents són correctes?\n\nServidor: $NEW_NAME\nDomini: $NEW_DOMAIN\nDispositiu: $NEW_DEV\nIP: $NEW_IP\nMàscara: $NEW_MASK\nPassarel·la: $NEW_GW\nDNS Primària: $NEW_DNS1\nDNS Secundària: $NEW_DNS2" \
+ --image="/usr/share/linkat/linkat-servidor/linkat-servidor-banner.png" \
+ --button="D'acord" --button="Cancel·la":11
+ res1="$?"
+@@ -213,7 +213,6 @@ ansible-playbook "$ANSIBLEPLAY"/server.y
+ cd "$FILES_LINKAT"/
+ sudo "$FILES_LINKAT"/ldap.sh
+ sudo "$FILES_LINKAT"/smbldap-populate.sh
+-sudo smbpasswd -w "$NEW_PASSROOT1"
+ 
+ ## Aplicant Playbook permisos i ACLs unitats
+ ansible-playbook "$ANSIBLEPLAY"/permisos.yml
+@@ -230,7 +229,7 @@ sudo "$FILES_LINKAT"/nextcloud.sh
+ #ansible-playbook "$ANSIBLEPLAY"/onlyoffice.yml
+ #chattr +i /etc/nginx/conf.d/onlyoffice-documentserver.conf
+ 
+-yad --width=300 --title="Linkat Servidor de centre" --text="\nLa configuració s'ha aplicat.\n\nEl Servidor de centre s'ha de reiniciar per aplicar els canvis.\n\nVoleu reiniciar ara?" \
++yad --width=300 --title="Linkat Servidor de centre" --text="\nLa configuració ha estat aplicada.\n\nEl Servidor de centre s'ha de reiniciar per aplicar els canvis.\n\nVoleu reiniciar-lo ara?" \
+ --image="/usr/share/linkat/linkat-servidor/linkat-servidor-banner.png" \
+ --button="D'acord" --button="Cancel·la":11
+ if [ $? -eq 0 ]; then
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/ldap.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/ldap.sh
+@@ -25,6 +25,8 @@ sudo ldapadd -Q -Y EXTERNAL -H ldapi:///
+ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f samba_indices.ldif
+ ### Samba LDAP  END  ###
+ 
++sudo smbpasswd -w __PASSROOT__
++
+ LOCALSID=$(sudo net getlocalsid | awk ' {print $6} ')
+ sed -i s/__GETLOCALSID__/"$LOCALSID"/g smbldap.conf
+ sed -i s/__GETLOCALSID__/"$LOCALSID"/g /etc/smbldap-tools/smbldap.conf
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/nfs-kernel-server
+@@ -0,0 +1,19 @@
++# Number of servers to start up
++RPCNFSDCOUNT=16
++
++# Runtime priority of server (see nice(1))
++RPCNFSDPRIORITY=0
++
++# Options for rpc.mountd.
++# If you have a port-based firewall, you might want to set up
++# a fixed port here using the --port option. For more information, 
++# see rpc.mountd(8) or http://wiki.debian.org/SecuringNFS
++# To disable NFSv4 on the server, specify '--no-nfs-version 4' here
++RPCMOUNTDOPTS="--manage-gids"
++
++# Do you want to start the svcgssd daemon? It is only required for Kerberos
++# exports. Valid alternatives are "yes" and "no"; the default is "no".
++NEED_SVCGSSD=""
++
++# Options for rpc.svcgssd.
++RPCSVCGSSDOPTS=""
