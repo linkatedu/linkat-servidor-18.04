@@ -1,0 +1,106 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-51) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-11-27
+
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/ldap.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/ldap.conf
+@@ -27,7 +27,7 @@
+ base dc=__DOMAIN__
+ 
+ # Another way to specify your LDAP server is to provide an
+-uri ldapi:///127.0.0.1/
++uri ldapi://%2fvar%2f%run%2fldapi
+ # Unix Domain Sockets to connect to a local LDAP Server.
+ #uri ldap://127.0.0.1/
+ #uri ldaps://127.0.0.1/   
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/named.conf.options
++++ linkat-servidor-18.04/linkat-servidor/plantilles/named.conf.options
+@@ -20,8 +20,8 @@ options {
+         // If BIND logs error messages about the root key being expired,
+         // you will need to update your keys.  See https://www.isc.org/bind-keys
+         //========================================================================
+-        dnssec-validation auto;
+-        max-cache-size 128M;
++        //dnssec-validation auto;
++	max-cache-size 128M;
+         edns-udp-size 512;
+         auth-nxdomain no;    # conform to RFC1035
+         listen-on-v6 { any; };
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/nextcloud.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/nextcloud.sh
+@@ -34,9 +34,10 @@ sudo nextcloud.occ config:app:set user_l
+ sudo nextcloud.occ config:app:set user_ldap ldap_userlist_filter --value="(|(objectclass=inetOrgPerson)(objectclass=organizationalPerson)(objectclass=person))"
+ sudo nextcloud.occ config:app:set user_ldap types --value="authentication"
+ sudo snap restart nextcloud
+-#sudo nextcloud.occ app:install onlyoffice
+-#sudo nextcloud.occ app:enable onlyoffice
+-#sudo nextcloud.occ config:app:set onlyoffice DocumentServerUrl --value="https://__IP__:10445/"
++sudo nextcloud.occ app:install onlyoffice
++sudo nextcloud.occ app:enable onlyoffice
++sudo nextcloud.occ config:app:set onlyoffice DocumentServerUrl --value="https://__IP__:10445/"
+ #sudo nextcloud.occ config:app:set --value https:\/\/__IP__:10445\/ onlyoffice DocumentServerUrl
+-#sudo nextcloud.occ config:system:set onlyoffice verify_peer_off --value="true"
++sudo nextcloud.occ config:system:set onlyoffice verify_peer_off --value="true"
++sudo snap restart nextcloud
+ 
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/onlyoffice.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/onlyoffice.sh
+@@ -1,24 +1,24 @@
+ #!/bin/bash
+ 
+-if [ -f /etc/modalitat_linkat ]; then
+-        sudo docker stop $(sudo docker ps -a -q)
+-        sudo docker rm $(sudo docker ps -a -q)
+-fi
+-
+ sudo mkdir -p /srv/app/onlyoffice/DocumentServer/data/certs
++sudo mkdir -p /srv/app/onlyoffice/DocumentServer/logs
++sudo mkdir -p /srv/app/onlyoffice/DocumentServer/lib
++sudo mkdir -p /srv/app/onlyoffice/DocumentServer/db
++
++openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /srv/app/onlyoffice/DocumentServer/data/certs/onlyoffice.key -out /srv/app/onlyoffice/DocumentServer/data/certs/onlyoffice.crt -subj "/C=ES/ST=Catalunya/L=Barcelona/O=Generalitat de Catalunya/OU=Departament Ensenyament/CN=xtec.cat"
+ 
+-sudo openssl req -x509 -nodes -days 36500 -newkey rsa:2048 -keyout /srv/app/onlyoffice/DocumentServer/data/certs/onlyoffice.key -out /srv/app/onlyoffice/DocumentServer/data/certs/onlyoffice.crt -subj "/C=ES/ST=Catalunya/L=Barcelona/O=Generalitat de Catalunya/OU=Departament Ensenyament/CN=xtec.cat"
++#openssl dhparam -out dhparam.pem 2048
+ 
+-sudo docker pull onlyoffice/documentserver
++docker pull linkat/onlyoffice
+ 
+-sudo docker run -itd -p 0.0.0.0:8443:443 --restart=always \
+-    -v /srv/app/onlyoffice/DocumentServer/cache:/var/lib/onlyoffice/documentserver/App_Data/cache/files  \
+-    -v /srv/app/onlyoffice/DocumentServer/logs:/var/log/onlyoffice  \
+-    -v /srv/app/onlyoffice/DocumentServer/data:/var/www/onlyoffice/Data onlyoffice/documentserver
++#sudo docker run -i -t -d -p 10445:443 --restart=always \
++#    -v /srv/app/onlyoffice/DocumentServer/logs:/var/log/onlyoffice  \
++#    -v /srv/app/onlyoffice/DocumentServer/data:/var/www/onlyoffice/Data  \
++#    -v /srv/app/onlyoffice/DocumentServer/lib:/var/lib/onlyoffice \
++#    -v /srv/app/onlyoffice/DocumentServer/db:/var/lib/postgresql  linkat/onlyoffice
+ 
+ sudo nextcloud.occ app:install onlyoffice
+ sudo nextcloud.occ app:enable onlyoffice
+-sudo nextcloud.occ config:app:set onlyoffice DocumentServerUrl --value="https://__IP__:8443/"
++sudo nextcloud.occ config:app:set onlyoffice DocumentServerUrl --value="https://__IP__:10445/"
+ sudo nextcloud.occ config:system:set onlyoffice verify_peer_off --value="true"
+ sudo snap restart nextcloud
+-
