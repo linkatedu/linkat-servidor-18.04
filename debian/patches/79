@@ -1,0 +1,43 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-79) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2019-03-22
+
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/nextcloud.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/nextcloud.sh
+@@ -17,13 +17,13 @@ sudo snap run nextcloud.occ app:install
+ sudo snap run nextcloud.occ app:enable user_ldap
+ sudo nextcloud.occ config:app:set user_ldap ldapAgentName --value="dc=__DOMAIN__"
+ sudo nextcloud.occ config:app:set user_ldap ldapBase --value="dc=__DOMAIN__"
+-sudo nextcloud.occ config:app:set user_ldap ldap_agent_password --value="__PASSROOT__"
++#sudo nextcloud.occ config:app:set user_ldap ldap_agent_password --value="__PASSROOT__"
+ sudo nextcloud.occ config:app:set user_ldap ldap_base --value="dc=__DOMAIN__"
+ sudo nextcloud.occ config:app:set user_ldap ldap_base_groups --value="dc=__DOMAIN__"
+ sudo nextcloud.occ config:app:set user_ldap ldap_base_users --value="dc=__DOMAIN__"
+ sudo nextcloud.occ config:app:set user_ldap ldap_configuration_active --value="1"
+ sudo nextcloud.occ config:app:set user_ldap ldap_display_name --value="cn"
+-sudo nextcloud.occ config:app:set user_ldap ldap_dn --value="cn=admin,dc=__DOMAIN__"
++#sudo nextcloud.occ config:app:set user_ldap ldap_dn --value="cn=admin,dc=__DOMAIN__"
+ sudo nextcloud.occ config:app:set user_ldap ldap_group_filter --value="(&(|(objectclass=posixGroup)))"
+ sudo nextcloud.occ config:app:set user_ldap ldap_group_member_assoc_attribute --value="gidNumber"
+ sudo nextcloud.occ config:app:set user_ldap ldap_groupfilter_objectclass --value="posixGroup"
