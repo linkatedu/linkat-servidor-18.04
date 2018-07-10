@@ -1,0 +1,135 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-11) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-08-20
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/permisos.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/permisos.yml
+@@ -6,4 +6,5 @@
+   become_method: sudo
+ 
+   roles:
+-    - permisos 
++    - permisos
++    - acl 
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -41,6 +41,18 @@ check_ip()
+ 	fi
+ }
+ 
++## Revisar connexió
++check_connexio()
++{
++	sudo hping3 -S google.com -p 443 -c 4
++	if [ $? -eq 0 ]; then
++		CONNEXIO="1"
++	else
++		echo -en "Error de connexió: Reviseu la configuració de xarxa"
++		exit 12
++	fi
++}
++
+ ## Revisar contrasenya
+ check_pass()
+ {
+@@ -113,7 +125,6 @@ while [ "$ERROR" -eq 1 ]; do
+ 	ERROR="0"
+ 	formulari
+ 	check_ip IP "$NEW_IP"
+-#	check_ip Màscara "$NEW_MASK"
+ 	check_ip Passarel·la "$NEW_GW"
+ 	check_ip DNS "$NEW_DNS1"
+   check_ip DNS "$NEW_DNS2"
+@@ -195,17 +206,21 @@ systemctl restart bind9.service
+ ansible-playbook "$ANSIBLEPLAY"/ldap.yml
+ ansible-playbook "$ANSIBLEPLAY"/server.yml
+ 
++## Revisa connexió
++check_connexio
++
+ ## Configurant servidor LDAP
+ cd "$FILES_LINKAT"/
+-"$FILES_LINKAT"/ldap.sh
+-"$FILES_LINKAT"/smbldap-populate.sh
++sudo "$FILES_LINKAT"/ldap.sh
++sudo "$FILES_LINKAT"/smbldap-populate.sh
+ 
+-## Aplicant Playbook permisos
++## Aplicant Playbook permisos i ACLs unitats
+ ansible-playbook "$ANSIBLEPLAY"/permisos.yml
+ sudo chmod -R +x /srv/exports/*
++ansible-playbook "$ANSIBLEPLAY"/acl.yml
+ 
+ ## Nextcloud
+-"$FILES_LINKAT"/nextcloud.sh
++#sudo "$FILES_LINKAT"/nextcloud.sh
+ 
+ ## Onlyoffice
+ #if [ -f /etc/nginx/conf.d/onlyoffice-documentserver.conf ]; then
+@@ -215,3 +230,9 @@ sudo chmod -R +x /srv/exports/*
+ #ansible-playbook "$ANSIBLEPLAY"/onlyoffice.yml
+ #chattr +i /etc/nginx/conf.d/onlyoffice-documentserver.conf
+ 
++yad --width=300 --title="Linkat Servidor de centre" --text="\nEl Servidor de centre s'ha de reiniciar per aplicar els canvis" \
++--image="/usr/share/linkat/linkat-servidor/linkat-servidor-banner.png" \
++--button="D'acord" --button="Cancel·la":11
++if [ $? -eq 0 ]; then
++	sudo shutdown -r now
++fi
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/nextcloud.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/nextcloud.sh
+@@ -28,9 +28,9 @@ sudo nextcloud.occ config:app:set user_l
+ sudo nextcloud.occ config:app:set user_ldap ldap_userfilter_objectclass --value="inetOrgPerson\norganizationalPerson\nperson"
+ sudo nextcloud.occ config:app:set user_ldap ldap_userlist_filter --value="(|(objectclass=inetOrgPerson)(objectclass=organizationalPerson)(objectclass=person))"
+ sudo nextcloud.occ config:app:set user_ldap types --value="authentication"
+-sudo nextcloud.occ app:install onlyoffice
+-sudo nextcloud.occ app:enable onlyoffice
+-sudo nextcloud.occ config:app:set onlyoffice DocumentServerUrl --value="https://__IP__:10445/"
++#sudo nextcloud.occ app:install onlyoffice
++#sudo nextcloud.occ app:enable onlyoffice
++#sudo nextcloud.occ config:app:set onlyoffice DocumentServerUrl --value="https://__IP__:10445/"
+ #sudo nextcloud.occ config:app:set --value https:\/\/__IP__:10445\/ onlyoffice DocumentServerUrl
+-sudo nextcloud.occ config:system:set onlyoffice verify_peer_off --value="true"
++#sudo nextcloud.occ config:system:set onlyoffice verify_peer_off --value="true"
+ 
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/onlyoffice.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/onlyoffice.sh
+@@ -4,3 +4,17 @@
+ sudo -i -u postgres psql -c "CREATE DATABASE onlyoffice;"
+ sudo -i -u postgres psql -c "CREATE USER onlyoffice WITH password '__PASSLNADMIN__';"
+ sudo -i -u postgres psql -c "GRANT ALL privileges ON DATABASE onlyoffice TO onlyoffice;"
++
++sudo mkdir -p /srv/app/onlyoffice/DocumentServer/data/certs/
++
++openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/ssl/onlyoffice/onlyoffice.key -out /etc/ssl/onlyoffice/onlyoffice.crt -subj "/C=ES/ST=Catalunya/L=Barcelona/O=Generalitat de Catalunya/OU=Departament Ensenyament/CN=xtec.cat"
++
++docker pull onlyoffice/documentserver
++
++sudo docker run -i -t -d -p 10445:443 --restart=always -v /srv/app/onlyoffice/DocumentServer/data:/var/www/onlyoffice/Data onlyoffice/documentserver
++
++#sudo nextcloud.occ app:install onlyoffice
++#sudo nextcloud.occ app:enable onlyoffice
++#sudo nextcloud.occ config:app:set onlyoffice DocumentServerUrl --value="https://__IP__:10445/"
++###sudo nextcloud.occ config:app:set --value https:\/\/__IP__:10445\/ onlyoffice DocumentServerUrl
++#sudo nextcloud.occ config:system:set onlyoffice verify_peer_off --value="true"
