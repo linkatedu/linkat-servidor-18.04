@@ -1,0 +1,428 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-3) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-07-12
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/ldap/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/ldap/tasks/main.yml
+@@ -2,15 +2,15 @@
+ - name: Aplicant la configuració del paquet slapd
+   command: debconf-set-selections /usr/share/linkat/linkat-servidor/configurador/files/debconf.slapd
+ 
+-- name: Aplicant la configuració del paquet ldap-auth-config
+-  command: debconf-set-selections /usr/share/linkat/linkat-servidor/configurador/files/debconf.ldap-auth-config
++#- name: Aplicant la configuració del paquet ldap-auth-config
++#  command: debconf-set-selections /usr/share/linkat/linkat-servidor/configurador/files/debconf.ldap-auth-config
+ 
+ - name: Instal·lant el paquet slapd
+   apt: pkg={{ item }} state=present update_cache=yes
+   with_items:
+   - slapd
+   - ldap-utils
+-  - ldap-auth-config
++#  - ldap-auth-config
+ 
+ - name: Copiant fitxers de configuració LDAP
+   copy: src=files/80-linkat-server-lightdm.conf dest=/usr/share/lightdm/lightdm.conf.d/80-linkat-server-lightdm.conf
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -196,8 +196,8 @@ ansible-playbook "$ANSIBLEPLAY"/ldap.yml
+ ansible-playbook "$ANSIBLEPLAY"/server.yml
+ 
+ ## Configurant servidor LDAP
+-#cd "$FILES_LINKAT"/
+-#./ldap.sh
++cd "$FILES_LINKAT"/
++./ldap.sh
+ 
+ ## Aplicant Playbook permisos
+ #ansible-playbook "$ANSIBLEPLAY"/permisos.yml
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/debconf.ldap-auth-config
++++ linkat-servidor-18.04/linkat-servidor/plantilles/debconf.ldap-auth-config
+@@ -4,7 +4,7 @@ ldap-auth-config        ldap-auth-config
+ ldap-auth-config        ldap-auth-config/override       boolean true
+ ldap-auth-config        ldap-auth-config/dbrootlogin    boolean true
+ ldap-auth-config        ldap-auth-config/move-to-debconf        boolean true
+-ldap-auth-config        ldap-auth-config/binddn string  cn=proxyuser,dc=__DOMAIN__
++ldap-auth-config        ldap-auth-config/binddn string  cn=proxyuser,dc=example,dc=net
+ ldap-auth-config        ldap-auth-config/ldapns/base-dn string  dc=__DOMAIN__
+ ldap-auth-config        ldap-auth-config/dblogin        boolean false
+ ldap-auth-config        ldap-auth-config/ldapns/ldap_version    select  3
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/ldap.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/ldap.conf
+@@ -24,10 +24,10 @@
+ #host 127.0.0.1
+ 
+ # The distinguished name of the search base.
+-base dc=__DOMAIN__
++base dc=intracentre
+ 
+ # Another way to specify your LDAP server is to provide an
+-uri ldapi://__NAME__.__DOMAIN__
++uri ldapi:///servidor.intracentre
+ # Unix Domain Sockets to connect to a local LDAP Server.
+ #uri ldap://127.0.0.1/
+ #uri ldaps://127.0.0.1/   
+@@ -49,11 +49,11 @@ ldap_version 3
+ # The distinguished name to bind to the server with
+ # if the effective user ID is root. Password is
+ # stored in /etc/ldap.secret (mode 600)
+-rootbinddn cn=admin,dc=__DOMAIN__
++rootbinddn cn=admin,dc=intracentre
+ 
+ # The port.
+ # Optional: default is 389.
+-port 389
++#port 389
+ 
+ # The search scope.
+ #scope sub
+@@ -266,12 +266,12 @@ pam_password md5
+ # Default is to use libldap's default behavior, which can be configured in
+ # /etc/openldap/ldap.conf using the TLS_REQCERT setting.  The default for
+ # OpenLDAP 2.0 and earlier is "no", for 2.1 and later is "yes".
+-tls_checkpeer yes
++#tls_checkpeer yes
+ 
+ # CA certificates for server certificate verification
+ # At least one of these are required if tls_checkpeer is "yes"
+-tls_cacertfile /etc/ssl/ca.cert
+-tls_cacertdir /etc/ssl/certs
++#tls_cacertfile /etc/ssl/ca.cert
++#tls_cacertdir /etc/ssl/certs
+ 
+ # Seed the PRNG if /dev/urandom is not provided
+ #tls_randfile /var/run/egd-pool
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/ldap.conf_OLD
+@@ -0,0 +1,296 @@
++###DEBCONF###
++##
++## Configuration of this file will be managed by debconf as long as the
++## first line of the file says '###DEBCONF###'
++##
++## You should use dpkg-reconfigure to configure this file via debconf
++##
++
++#
++# @(#)$Id: ldap.conf,v 1.38 2006/05/15 08:13:31 lukeh Exp $
++#
++# This is the configuration file for the LDAP nameservice
++# switch library and the LDAP PAM module.
++#
++# PADL Software
++# http://www.padl.com
++#
++
++# Your LDAP server. Must be resolvable without using LDAP.
++# Multiple hosts may be specified, each separated by a 
++# space. How long nss_ldap takes to failover depends on
++# whether your LDAP client library supports configurable
++# network or connect timeouts (see bind_timelimit).
++#host 127.0.0.1
++
++# The distinguished name of the search base.
++base dc=__DOMAIN__
++
++# Another way to specify your LDAP server is to provide an
++uri ldapi://__NAME__.__DOMAIN__
++# Unix Domain Sockets to connect to a local LDAP Server.
++#uri ldap://127.0.0.1/
++#uri ldaps://127.0.0.1/   
++#uri ldapi://%2fvar%2frun%2fldapi_sock/
++# Note: %2f encodes the '/' used as directory separator
++
++# The LDAP version to use (defaults to 3
++# if supported by client library)
++ldap_version 3
++
++# The distinguished name to bind to the server with.
++# Optional: default is to bind anonymously.
++#binddn cn=proxyuser,dc=padl,dc=com
++
++# The credentials to bind with. 
++# Optional: default is no credential.
++#bindpw secret
++
++# The distinguished name to bind to the server with
++# if the effective user ID is root. Password is
++# stored in /etc/ldap.secret (mode 600)
++rootbinddn cn=admin,dc=__DOMAIN__
++
++# The port.
++# Optional: default is 389.
++port 389
++
++# The search scope.
++#scope sub
++#scope one
++#scope base
++
++# Search timelimit
++#timelimit 30
++
++# Bind/connect timelimit
++#bind_timelimit 30
++
++# Reconnect policy: hard (default) will retry connecting to
++# the software with exponential backoff, soft will fail
++# immediately.
++#bind_policy hard
++
++# Idle timelimit; client will close connections
++# (nss_ldap only) if the server has not been contacted
++# for the number of seconds specified below.
++#idle_timelimit 3600
++
++# Filter to AND with uid=%s
++#pam_filter objectclass=account
++
++# The user ID attribute (defaults to uid)
++#pam_login_attribute uid
++
++# Search the root DSE for the password policy (works
++# with Netscape Directory Server)
++#pam_lookup_policy yes
++
++# Check the 'host' attribute for access control
++# Default is no; if set to yes, and user has no
++# value for the host attribute, and pam_ldap is
++# configured for account management (authorization)
++# then the user will not be allowed to login.
++#pam_check_host_attr yes
++
++# Check the 'authorizedService' attribute for access
++# control
++# Default is no; if set to yes, and the user has no
++# value for the authorizedService attribute, and
++# pam_ldap is configured for account management
++# (authorization) then the user will not be allowed
++# to login.
++#pam_check_service_attr yes
++
++# Group to enforce membership of
++#pam_groupdn cn=PAM,ou=Groups,dc=padl,dc=com
++
++# Group member attribute
++#pam_member_attribute uniquemember
++
++# Specify a minium or maximum UID number allowed
++#pam_min_uid 0
++#pam_max_uid 0
++
++# Template login attribute, default template user
++# (can be overriden by value of former attribute
++# in user's entry)
++#pam_login_attribute userPrincipalName
++#pam_template_login_attribute uid
++#pam_template_login nobody
++
++# HEADS UP: the pam_crypt, pam_nds_passwd,
++# and pam_ad_passwd options are no
++# longer supported.
++#
++# Do not hash the password at all; presume
++# the directory server will do it, if
++# necessary. This is the default.
++pam_password md5
++
++# Hash password locally; required for University of
++# Michigan LDAP server, and works with Netscape
++# Directory Server if you're using the UNIX-Crypt
++# hash mechanism and not using the NT Synchronization
++# service. 
++#pam_password crypt
++
++# Remove old password first, then update in
++# cleartext. Necessary for use with Novell
++# Directory Services (NDS)
++#pam_password clear_remove_old
++#pam_password nds
++
++# RACF is an alias for the above. For use with
++# IBM RACF
++#pam_password racf
++
++# Update Active Directory password, by
++# creating Unicode password and updating
++# unicodePwd attribute.
++#pam_password ad
++
++# Use the OpenLDAP password change
++# extended operation to update the password.
++#pam_password exop
++
++# Redirect users to a URL or somesuch on password
++# changes.
++#pam_password_prohibit_message Please visit http://internal to change your password.
++
++# RFC2307bis naming contexts
++# Syntax:
++# nss_base_XXX		base?scope?filter
++# where scope is {base,one,sub}
++# and filter is a filter to be &'d with the
++# default filter.
++# You can omit the suffix eg:
++# nss_base_passwd	ou=People,
++# to append the default base DN but this
++# may incur a small performance impact.
++#nss_base_passwd	ou=People,dc=padl,dc=com?one
++#nss_base_shadow	ou=People,dc=padl,dc=com?one
++#nss_base_group		ou=Group,dc=padl,dc=com?one
++#nss_base_hosts		ou=Hosts,dc=padl,dc=com?one
++#nss_base_services	ou=Services,dc=padl,dc=com?one
++#nss_base_networks	ou=Networks,dc=padl,dc=com?one
++#nss_base_protocols	ou=Protocols,dc=padl,dc=com?one
++#nss_base_rpc		ou=Rpc,dc=padl,dc=com?one
++#nss_base_ethers	ou=Ethers,dc=padl,dc=com?one
++#nss_base_netmasks	ou=Networks,dc=padl,dc=com?ne
++#nss_base_bootparams	ou=Ethers,dc=padl,dc=com?one
++#nss_base_aliases	ou=Aliases,dc=padl,dc=com?one
++#nss_base_netgroup	ou=Netgroup,dc=padl,dc=com?one
++
++# attribute/objectclass mapping
++# Syntax:
++#nss_map_attribute	rfc2307attribute	mapped_attribute
++#nss_map_objectclass	rfc2307objectclass	mapped_objectclass
++
++# configure --enable-nds is no longer supported.
++# NDS mappings
++#nss_map_attribute uniqueMember member
++
++# Services for UNIX 3.5 mappings
++#nss_map_objectclass posixAccount User
++#nss_map_objectclass shadowAccount User
++#nss_map_attribute uid msSFU30Name
++#nss_map_attribute uniqueMember msSFU30PosixMember
++#nss_map_attribute userPassword msSFU30Password
++#nss_map_attribute homeDirectory msSFU30HomeDirectory
++#nss_map_attribute homeDirectory msSFUHomeDirectory
++#nss_map_objectclass posixGroup Group
++#pam_login_attribute msSFU30Name
++#pam_filter objectclass=User
++#pam_password ad
++
++# configure --enable-mssfu-schema is no longer supported.
++# Services for UNIX 2.0 mappings
++#nss_map_objectclass posixAccount User
++#nss_map_objectclass shadowAccount user
++#nss_map_attribute uid msSFUName
++#nss_map_attribute uniqueMember posixMember
++#nss_map_attribute userPassword msSFUPassword
++#nss_map_attribute homeDirectory msSFUHomeDirectory
++#nss_map_attribute shadowLastChange pwdLastSet
++#nss_map_objectclass posixGroup Group
++#nss_map_attribute cn msSFUName
++#pam_login_attribute msSFUName
++#pam_filter objectclass=User
++#pam_password ad
++
++# RFC 2307 (AD) mappings
++#nss_map_objectclass posixAccount user
++#nss_map_objectclass shadowAccount user
++#nss_map_attribute uid sAMAccountName
++#nss_map_attribute homeDirectory unixHomeDirectory
++#nss_map_attribute shadowLastChange pwdLastSet
++#nss_map_objectclass posixGroup group
++#nss_map_attribute uniqueMember member
++#pam_login_attribute sAMAccountName
++#pam_filter objectclass=User
++#pam_password ad
++
++# configure --enable-authpassword is no longer supported
++# AuthPassword mappings
++#nss_map_attribute userPassword authPassword
++
++# AIX SecureWay mappings
++#nss_map_objectclass posixAccount aixAccount
++#nss_base_passwd ou=aixaccount,?one
++#nss_map_attribute uid userName
++#nss_map_attribute gidNumber gid
++#nss_map_attribute uidNumber uid
++#nss_map_attribute userPassword passwordChar
++#nss_map_objectclass posixGroup aixAccessGroup
++#nss_base_group ou=aixgroup,?one
++#nss_map_attribute cn groupName
++#nss_map_attribute uniqueMember member
++#pam_login_attribute userName
++#pam_filter objectclass=aixAccount
++#pam_password clear
++
++# Netscape SDK LDAPS
++#ssl on
++
++# Netscape SDK SSL options
++#sslpath /etc/ssl/certs
++
++# OpenLDAP SSL mechanism
++# start_tls mechanism uses the normal LDAP port, LDAPS typically 636
++#ssl start_tls
++#ssl on
++
++# OpenLDAP SSL options
++# Require and verify server certificate (yes/no)
++# Default is to use libldap's default behavior, which can be configured in
++# /etc/openldap/ldap.conf using the TLS_REQCERT setting.  The default for
++# OpenLDAP 2.0 and earlier is "no", for 2.1 and later is "yes".
++tls_checkpeer yes
++
++# CA certificates for server certificate verification
++# At least one of these are required if tls_checkpeer is "yes"
++tls_cacertfile /etc/ssl/ca.cert
++tls_cacertdir /etc/ssl/certs
++
++# Seed the PRNG if /dev/urandom is not provided
++#tls_randfile /var/run/egd-pool
++
++# SSL cipher suite
++# See man ciphers for syntax
++#tls_ciphers TLSv1
++
++# Client certificate and key
++# Use these, if your server requires client authentication.
++#tls_cert
++#tls_key
++
++# Disable SASL security layers. This is needed for AD.
++#sasl_secprops maxssf=0
++
++# Override the default Kerberos ticket cache location.
++#krb5_ccname FILE:/etc/.ldapcache
++
++# SASL mechanism for PAM authentication - use is experimental
++# at present and does not support password policy control
++#pam_sasl_mech DIGEST-MD5
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/ldap.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/ldap.sh
+@@ -21,6 +21,10 @@ sudo systemctl restart slapd.service
+ 
+ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f certinfo.ldif
+ 
++sudo apt install libnss-ldap
++sudo debconf-set-selections /usr/share/linkat/linkat-servidor/configurador/files/debconf.ldap-auth-config
++sudo apt install ldap-auth-config
++
+ sudo auth-client-config -t nss -p lac_ldap
+ 
+-pam-auth-update
++sudo pam-auth-update
