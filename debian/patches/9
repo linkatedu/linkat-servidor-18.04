@@ -1,0 +1,251 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-8) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-08-13
+
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/configurador/onlyoffice.yml
+@@ -0,0 +1,9 @@
++---
++- name: Onlyoffice 
++  hosts: servidor
++  remote_user: anuser
++  become: yes
++  become_method: sudo
++
++  roles:
++    - onlyoffice
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/onlyoffice/tasks/main.yml
+@@ -0,0 +1,32 @@
++---
++- name: Aplicant la configuració del paquet onlyoffice-documentserver 
++  command: debconf-set-selections /usr/share/linkat/linkat-servidor/configurador/files/debconf.onlyoffice-documentserver
++
++- name: Directori SSL Onlyoffice
++  file:
++        path: /etc/ssl/onlyoffice
++        state: directory
++        owner: root
++        group: root
++        mode: 0644
++
++- name: Generant claus Onlyoffice
++  command: openssl req -x509 -nodes -days 36500 -newkey rsa:2048 -keyout /etc/ssl/onlyoffice/onlyoffice.key -out /etc/ssl/onlyoffice/onlyoffice.crt -subj "/C=ES/ST=Catalunya/L=Barcelona/O=Generalitat de Catalunya/OU=Departament Ensenyament/CN=xtec.cat"
++
++- name: Instal·lant els paquets del servidor LDAP
++  apt: pkg={{ item }} state=present update_cache=yes
++  with_items:
++  - onlyoffice-documentserver 
++
++- name: Copiant fitxers de configuració Onlyoffice 
++  copy: src=files/onlyoffice-documentserver.conf dest=/etc/nginx/conf.d/onlyoffice-documentserver.conf
++
++- file:
++        path: /etc/nginx/conf.d/onlyoffice-documentserver.conf
++        owner: root
++        group: root
++        mode: 0644
++
++- name: Activant servei nginx 
++  service: name=nginx state=started enabled=yes
++  notify: restart nginx
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -208,5 +208,9 @@ sudo chmod -R +x /srv/exports/*
+ "$FILES_LINKAT"/nextcloud.sh
+ 
+ ## Onlyoffice
++if [ -f /etc/nginx/conf.d/onlyoffice-documentserver.conf ]; then
++	sudo chattr -i /etc/nginx/conf.d/onlyoffice-documentserver.conf
++fi
+ "$FILES_LINKAT"/onlyoffice.sh
+-
++ansible-playbook "$ANSIBLEPLAY"/onlyoffice.yml
++chattr +i /etc/nginx/conf.d/onlyoffice-documentserver.conf
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/ldap.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/ldap.conf
+@@ -24,10 +24,10 @@
+ #host 127.0.0.1
+ 
+ # The distinguished name of the search base.
+-base dc=intracentre
++base dc=__DOMAIN__
+ 
+ # Another way to specify your LDAP server is to provide an
+-uri ldapi:///servidor.intracentre
++uri ldapi:///127.0.0.1/
+ # Unix Domain Sockets to connect to a local LDAP Server.
+ #uri ldap://127.0.0.1/
+ #uri ldaps://127.0.0.1/   
+@@ -49,7 +49,7 @@ ldap_version 3
+ # The distinguished name to bind to the server with
+ # if the effective user ID is root. Password is
+ # stored in /etc/ldap.secret (mode 600)
+-rootbinddn cn=admin,dc=intracentre
++rootbinddn cn=admin,dc=__DOMAIN__
+ 
+ # The port.
+ # Optional: default is 389.
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/onlyoffice-documentserver.conf
+@@ -0,0 +1,70 @@
++include /etc/nginx/includes/onlyoffice-http.conf;
++
++## Normal HTTP host
++#server {
++#  listen 0.0.0.0:80;
++#  listen [::]:80 default_server;
++#  server_name _;
++#  server_tokens off;
++
++  ## Redirects all traffic to the HTTPS host
++#  root /nowhere; ## root doesn't have to be a valid path since we are redirecting
++#  rewrite ^ https://$host$request_uri? permanent;
++#}
++
++#HTTP host for internal services
++#server {
++#  listen 127.0.0.1:80;
++#  listen [::1]:80;
++#  server_name localhost;
++#  server_tokens off;
++  
++#  include /etc/nginx/includes/onlyoffice-documentserver-common.conf;
++#  include /etc/nginx/includes/onlyoffice-documentserver-docservice.conf;
++#}
++
++## HTTPS host
++server {
++  listen 0.0.0.0:10445 ssl;
++  listen [::]:10445 ssl default_server;
++  server_tokens off;
++  root /usr/share/nginx/html;
++
++  ## Strong SSL Security
++  ## https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
++  ssl on;
++  ssl_certificate /etc/apache2/ssl/owncloud-server.crt;
++  ssl_certificate_key /etc/apache2/ssl/owncloud-server.key;
++  ssl_verify_client off;
++
++  ssl_ciphers "ECDHE-RSA-AES128-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA128:DHE-RSA-AES128-GCM-SHA384:DHE-RSA-AES128-GCM-SHA128:ECDHE-RSA-AES128-SHA384:ECDHE-RSA-AES128-SHA128:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA128:DHE-RSA-AES128-SHA128:DHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA384:AES128-GCM-SHA128:AES128-SHA128:AES128-SHA128:AES128-SHA:AES128-SHA:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4";
++
++  ssl_protocols  TLSv1 TLSv1.1 TLSv1.2;
++  ssl_session_cache  builtin:1000  shared:SSL:10m;
++
++  ssl_prefer_server_ciphers   on;
++
++  add_header Strict-Transport-Security max-age=31536000;
++  # add_header X-Frame-Options SAMEORIGIN;
++  add_header X-Content-Type-Options nosniff;
++
++  ## [Optional] If your certficate has OCSP, enable OCSP stapling to reduce the overhead and latency of running SSL.
++  ## Replace with your ssl_trusted_certificate. For more info see:
++  ## - https://medium.com/devops-programming/4445f4862461
++  ## - https://www.ruby-forum.com/topic/4419319
++  ## - https://www.digitalocean.com/community/tutorials/how-to-configure-ocsp-stapling-on-apache-and-nginx
++  # ssl_stapling on;
++  # ssl_stapling_verify on;
++  # ssl_trusted_certificate /etc/nginx/ssl/stapling.trusted.crt;
++  # resolver 208.67.222.222 208.67.222.220 valid=300s; # Can change to your DNS resolver if desired
++  # resolver_timeout 10s;
++
++  ## [Optional] Generate a stronger DHE parameter:
++  ##   cd /etc/ssl/certs
++  ##   sudo openssl dhparam -out dhparam.pem 4096
++  ##
++  # ssl_dhparam /etc/ssl/certs/dhparam.pem;
++
++  include /etc/nginx/includes/onlyoffice-documentserver-*.conf;
++
++}
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/onlyoffice.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/onlyoffice.sh
+@@ -1,66 +1,6 @@
+ #!/bin/bash
+ 
+-. /etc/linkat/linkat-servidor/linkat-servidor.conf
+-
+-LOG=/var/log/linkat-onlyoffice.log
+-
+-# Check Internet connection. Necessary for the installation.
+-wget -q --tries=10 --timeout=20 --spider http://google.com
+-if [[ $? -eq 0 ]]; then
+-        echo "Online" >> $LOG
+-else
+-        $ZENITY --error --title="Instal·lació Onlyoffice" --text="Error: No hi ha connexió a Internet.\n\nEl programa d'instal·lació s'aturarà."
+-                                exit 1
+-fi
+-
+ # Create onlyoffice database
+ sudo -i -u postgres psql -c "CREATE DATABASE onlyoffice;"
+ sudo -i -u postgres psql -c "CREATE USER onlyoffice WITH password '__PASSLNADMIN__';"
+ sudo -i -u postgres psql -c "GRANT ALL privileges ON DATABASE onlyoffice TO onlyoffice;"
+-
+-# Kill update programs and update repository info.
+-killall update-manager update-notifier  > /dev/null 2>&1
+-sudo apt-get update
+-if [ ! $? -eq 0 ]; then
+-        $ZENITY --error --text="Error a l'actualitzar els repositoris.\nComproveu la vostra connexió a Internet.\n"
+-        echo -en "Error a l'actualitzar els repositoris.\nComproveu la vostra connexió a Internet.\n" >> $LOG
+-        exit 1
+-fi
+-
+-sudo debconf-set-selections /usr/share/linkat/linkat-servidor/configurador/files/debconf.onlyoffice-documentserver
+-
+-killall update-manager update-notifier  > /dev/null 2>&1
+-sudo apt-get install -y onlyoffice-documentserver --force-yes
+-if [ ! $? -eq 0 ]; then
+-        $ZENITY --error --text="Error a l'instal·lar el programa.\n"
+-        echo -en "Error a l'instal·lar el programa.\n" >> $LOG
+-        exit 1
+-fi
+-echo -en "Configurant el servei nginx..."
+-# Stop nginx service
+-sudo service nginx stop
+-
+-# Generar certificat
+-mkdir -p /etc/ssl/onlyoffice/
+-openssl req -x509 -nodes -days 36500 -newkey rsa:2048 -keyout /etc/ssl/onlyoffice/onlyoffice.key -out /etc/ssl/onlyoffice/onlyoffice.crt -subj "/C=ES/ST=Catalunya/L=Barcelona/O=Generalitat de Catalunya/OU=Departament Ensenyament/CN=xtec.cat"
+-
+-chattr -i /etc/nginx/conf.d/onlyoffice-documentserver.conf
+-
+-# Copy nginx config file for onlyoffice
+-sudo cp -f /usr/share/linkat/linkat-onlyoffice/onlyoffice-documentserver.conf /etc/nginx/conf.d/onlyoffice-documentserver.conf
+-
+-# Start nginx service.
+-sudo service nginx start
+-if [ ! $? -eq 0 ]; then
+-        $ZENITY --error --text="Error a l'iniciar el servei nginx.\n"
+-        echo -en "Error a l'iniciar el servei nginx.\n" >> $LOG
+-        exit 1
+-else
+-        echo -en "Servei nginx en funcionament."\n
+-fi
+-
+-$ZENITY --info --title="Instal·lació OnlyOffice" --text="OnlyOffice s'ha instal·lat en aquest servidor.\n\nEls clients han d'acceptar el certificat des d'aquesta URL\n\nhttps://$NEW_IP:10445"
+-
+-chattr +i /etc/nginx/conf.d/onlyoffice-documentserver.conf
+-
+-touch /etc/Linkat/linkat-onlyoffice/config
