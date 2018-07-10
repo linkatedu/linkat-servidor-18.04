@@ -1,0 +1,120 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-52) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-12-14
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/acl/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/acl/tasks/main.yml
+@@ -429,3 +429,18 @@
+         state: present
+         entry: "user:clamav:rwx"
+         recursive: yes
++
++- name: Verificant ACL lnadmin App
++  acl:
++        path: /srv/app
++        entry: "default:user:lnadmin:rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL lnadmin App
++  acl:
++        path: /srv/app
++        state: present
++        entry: "user:lnadmin:rwx"
++        recursive: yes
++
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/fog/tasks/main.yml
+@@ -0,0 +1,9 @@
++---
++- name: Copiant fitxers de configuració FOG 
++  copy: src=files/fog.conf dest=/etc/linkat/docker/dnsmasq/fog.conf
++
++- file:
++        path: /etc/linkat/docker/dnsmasq/fog.conf
++        owner: root
++        group: root
++        mode: 0644
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/server.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/server.yml
+@@ -12,4 +12,4 @@
+     - dlna
+     - webmin
+     - clamav
+-#    - jclic
++    - fog
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/docker.fogproject.service
+@@ -0,0 +1,15 @@
++[Unit]
++Description=Fogproject Service
++After=docker.service
++Requires=docker.service
++ 
++[Service]
++TimeoutStartSec=0
++#Restart=always
++ExecStartPre=-/usr/bin/docker stop fogproject
++ExecStartPre=-/usr/bin/docker rm fogproject 
++ExecStartPre=/usr/bin/docker pull linkat/fogproject
++ExecStart=/usr/bin/docker run -d -p 20:20 -p 21:21 -p 67:67/udp -p 82:80 -p 69:69/udp --privileged -h dockerfog --name fogproject -v /srv/app/fogproject/mysql:/var/lib/mysql -v /etc/linkat/docker/dnsmasq:/etc/dnsmasq.d/ -e WEB_HOST_PORT=82 -e WEB_HOST_IP=__IP__ linkat/fogproject
++ 
++[Install]
++WantedBy=multi-user.target
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/fog.conf
+@@ -0,0 +1,11 @@
++port=0
++log-dhcp
++tftp-root=/tftproot
++dhcp-boot=undionly.kpxe,,__IP__
++#dhcp-option=17,/images
++#dhcp-option=vendor:PXEClient,6,2b
++dhcp-no-override
++pxe-prompt="Apreta F8 per al menu", 3
++pxe-service=X86PC, "Arrenca de la xarxa", undionly
++#pxe-service=X86PC, "Arrenca de Disc Dur", 0
++dhcp-range=__IP__, proxy 
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/ldap.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/ldap.conf
+@@ -21,7 +21,7 @@
+ # space. How long nss_ldap takes to failover depends on
+ # whether your LDAP client library supports configurable
+ # network or connect timeouts (see bind_timelimit).
+-#host 127.0.0.1
++host 127.0.0.1
+ 
+ # The distinguished name of the search base.
+ base dc=__DOMAIN__
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/libnss-ldap.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/libnss-ldap.conf
+@@ -21,7 +21,7 @@
+ # space. How long nss_ldap takes to failover depends on
+ # whether your LDAP client library supports configurable
+ # network or connect timeouts (see bind_timelimit).
+-#host 127.0.0.1
++host 127.0.0.1
+ 
+ # The distinguished name of the search base.
+ base dc=__DOMAIN__
