@@ -1,0 +1,46 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-20) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-08-22
+
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -219,7 +219,7 @@ ansible-playbook "$ANSIBLEPLAY"/permisos
+ ansible-playbook "$ANSIBLEPLAY"/acl.yml
+ 
+ ## Nextcloud
+-#sudo "$FILES_LINKAT"/nextcloud.sh
++sudo "$FILES_LINKAT"/nextcloud.sh
+ 
+ ## Onlyoffice
+ #if [ -f /etc/nginx/conf.d/onlyoffice-documentserver.conf ]; then
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/nextcloud.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/nextcloud.sh
+@@ -28,6 +28,7 @@ sudo nextcloud.occ config:app:set user_l
+ sudo nextcloud.occ config:app:set user_ldap ldap_userfilter_objectclass --value="inetOrgPerson\norganizationalPerson\nperson"
+ sudo nextcloud.occ config:app:set user_ldap ldap_userlist_filter --value="(|(objectclass=inetOrgPerson)(objectclass=organizationalPerson)(objectclass=person))"
+ sudo nextcloud.occ config:app:set user_ldap types --value="authentication"
++sudo snap restart nextcloud
+ #sudo nextcloud.occ app:install onlyoffice
+ #sudo nextcloud.occ app:enable onlyoffice
+ #sudo nextcloud.occ config:app:set onlyoffice DocumentServerUrl --value="https://__IP__:10445/"
