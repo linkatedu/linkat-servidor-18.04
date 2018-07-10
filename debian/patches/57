@@ -1,0 +1,94 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-57) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2019-01-31
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/permisos/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/permisos/tasks/main.yml
+@@ -118,7 +118,7 @@
+         path: /srv/exports/cloudprint
+         state: directory
+         owner: root
+-        group: Professorat
++        group: Cloudprint
+         mode: 02770
+ 
+ - name: Verificant unitats Maquetes
+@@ -137,13 +137,13 @@
+         group: Professorat
+         mode: 02770
+ 
+-- name: Verificant unitat Paperera cloudprint
+-  file:
+-        path: /srv/exports/Paperera/Paperera_Unitat_cloudprint
+-        state: directory
+-        owner: root
+-        group: Professorat
+-        mode: 02770
++#- name: Verificant unitat Paperera cloudprint
++#  file:
++#        path: /srv/exports/Paperera/Paperera_Unitat_cloudprint
++#        state: directory
++#        owner: root
++#        group: Cloudprint
++#        mode: 02770
+ 
+ #- name: Verificant unitats Paperera maquetes
+ #  file:
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/cloudprint.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/cloudprint.conf
+@@ -9,12 +9,12 @@
+    write ok = true
+    force create mode = 664
+    force directory mode = 775
+-   force group = Professorat
+-   valid users = @Professorat
++   force group = Cloudprint
++   valid users = @Cloudprint
+    create mask = 664
+-   vfs objects = recycle
+-   recycle:repository = /srv/exports/Paperera/Paperera_Unitat_cloudprint
+-   recycle:exclude = *.tmp *.temp *.o
+-   recycle:versions = Yes
+-   recycle:keeptree = Yes
+-   recycle:touch = true
++#   vfs objects = recycle
++#   recycle:repository = /srv/exports/Paperera/Paperera_Unitat_cloudprint
++#   recycle:exclude = *.tmp *.temp *.o
++#   recycle:versions = Yes
++#   recycle:keeptree = Yes
++#   recycle:touch = true
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/grups.ldif
++++ linkat-servidor-18.04/linkat-servidor/plantilles/grups.ldif
+@@ -23,6 +23,11 @@ cn: Gestio
+ gidNumber: 10004
+ objectClass: posixGroup
+ 
++dn: cn=Cloudprint,ou=Groups,dc=__DOMAIN__
++cn: Gestio
++gidNumber: 10005
++objectClass: posixGroup
++
+ dn: cn=users,ou=Groups,dc=__DOMAIN__
+ cn: users
+ gidNumber: 100
