@@ -1,0 +1,162 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-25) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-09-26
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/webmin/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/webmin/tasks/main.yml
+@@ -11,8 +11,8 @@
+ - name: Copiant fitxers de configuració WEBMIN
+   copy: src=files/websambaconfig dest=/etc/webmin/samba/config
+ 
+-  #- name: Copiant fitxers de configuració WEBMIN
+-  #  copy: src=files/webldap-useradminconfig dest=/etc/webmin/ldap-useradmin/config
++- name: Copiant fitxers de configuració WEBMIN
++  copy: src=files/webldap-useradminconfig dest=/etc/webmin/ldap-useradmin/config
+ 
+ - file:
+         path: /etc/webmin/config
+@@ -38,11 +38,11 @@
+         group: root
+         mode: 0600
+         
+-        #- file:
+-        #path: /etc/webmin/ldap-useradmin/config
+-        #owner: root
+-        #group: root
+-        #mode: 0600
++- file:
++        path: /etc/webmin/ldap-useradmin/config
++        owner: root
++        group: root
++        mode: 0600
+ 
+ - name: Activant servei WEBMIN
+   service: name=webmin state=started enabled=yes
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/webldap-useradminconfig
++++ linkat-servidor-18.04/linkat-servidor/plantilles/webldap-useradminconfig
+@@ -1,6 +1,6 @@
+ imap_foldersep=.
+ secmode=0
+-samba_gclass=sambaGroup
++samba_gclass=sambaGroupMapping
+ imap_login=cyrus
+ multi_fields=0
+ alias_same=0
+@@ -16,57 +16,57 @@ mailfmt=0
+ person=1
+ membox=0
+ slappasswd=slappasswd
+-samba_def=1
++samba_def=0
+ ldap_tls=0
+ gecos=1
+ imap_folders=old	public	sent-mail
+ given_order=0
+ quota_support=0
+-login=
+-default_shell=
+-maillocaladdress=
+-group_fields=
+-user_files=
+-pre_command=
+-user_filter=
+-post_command=
+-noclash=
+-group_props=
+-random_password=
+-group_filter=
+-mod_props=
+-quota=
+-homedir_perms=
+-imap_host=
+-imap_folderalt=
+-samba_props=
+-props=
+-base_uid=
+-user_base=
+-other_class=
+-default_max=
++ldap_port=
+ addressbook=
+-default_min=
+-gother_class=
+-samba_domain=
+-home_style=
+-domain=
++imap_props=
+ default_other=
++default_secs=
++group_props=
++samba_props=
++fields=
++imap_folderalt=
+ charset=
+ display_max=
+-passwd_stars=
+-default_expire=
+-ldap_port=
++samba_gid=
++user_filter=
++login=
++imap_pass=
+ default_warn=
+-default_secs=
++pre_command=
+ group_base=
++post_command=
++other_class=
++base_uid=
++user_base=
++passwd_stars=
++home_base=
++mod_props=
+ group_mod_props=
+-imap_props=
+-default_inactive=
+-fields=
++imap_host=
++quota=
++default_min=
++user_files=
++domain=
+ base_gid=
++gother_class=
++default_max=
++noclash=
++default_shell=
++homedir_perms=
++maillocaladdress=
++default_expire=
+ default_group=
+-home_base=
+-imap_pass=
+-samba_gid=
++props=
++group_fields=
++default_inactive=
++home_style=
++group_filter=
++samba_domain=
++random_password=
+ ldap_host=
