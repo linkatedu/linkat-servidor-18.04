@@ -1,0 +1,239 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-27) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-09-28
+
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -5,6 +5,7 @@ CONF_FILE=/etc/linkat/linkat-servidor/li
+ PLANTILLES=/usr/share/linkat/linkat-servidor/plantilles
+ FILES_LINKAT=/usr/share/linkat/linkat-servidor/configurador/files
+ ANSIBLEPLAY=/usr/share/linkat/linkat-servidor/configurador
++LOGS=/var/log/linkat-servidor.log
+ DATE=`date '+%Y-%m-%d_%H:%M:%S'`
+ 
+ if [ -f "$CONF_FILE" ]; then
+@@ -109,6 +110,15 @@ NEW_PASSLNADMIN1=$(echo "$res" | awk -F"
+ NEW_PASSLNADMIN2=$(echo "$res" | awk -F"|" '{print $12}')
+ }
+ 
++check_errors()
++{
++if [ ! "$?" -eq 0 ]; then
++	echo -en "Error: $1"
++	yad --title="Error" --text="\nS'ha produit un error durant la instal·lacio de: $1.\nEl programa es tancara." --image="dialog-error" --button="D'acord"
++	exit 22
++fi
++}
++
+ validar_formulari()
+ {
+ yad --width=400 --title="Linkat Servidor de centre" --text="\nLes dades següents són correctes?\n\nServidor: $NEW_NAME\nDomini: $NEW_DOMAIN\nDispositiu: $NEW_DEV\nIP: $NEW_IP\nMàscara: $NEW_MASK\nPassarel·la: $NEW_GW\nDNS Primària: $NEW_DNS1\nDNS Secundària: $NEW_DNS2" \
+@@ -181,6 +191,8 @@ sed -i s/__IP2__/"$IP2"/g *
+ sed -i s/__IP3__/"$IP3"/g *
+ sed -i s/__IP4__/"$IP4"/g *
+ 
++echo "$DATE" >> "$LOGS"
++
+ ## Nou passwd de l'usuari lnadmin i root
+ echo "lnadmin:$NEW_PASSLNADMIN1" | chpasswd
+ 
+@@ -190,7 +202,7 @@ echo -en "Aplicant configuracions...\n\n
+ killall update-manager update-notifier 2>&1
+ 
+ ## Aplica nova configuració de xarxa
+-cp -av "$FILES_LINKAT"/50-linkat-net-config.yaml /etc/netplan/
++cp -av "$FILES_LINKAT"/50-linkat-net-config.yaml /etc/netplan/ > /dev/null 2>&1
+ netplan apply
+ 
+ ## Repara el fitxer resolv.conf
+@@ -206,18 +218,33 @@ systemctl restart bind9.service
+ ## Revisa connexió
+ check_connexio
+ 
++killall update-manager update-notifier > /dev/null 2>&1
++dpkg -s slapd > /dev/null 2>&1
++res="$?"
++if [ "$res" -eq 0 ]; then
++	sudo apt purge slapd ldap-auth-config auth-client-config -y
++fi
++
++## Aplicant Playbook LDAP
+ ansible-playbook "$ANSIBLEPLAY"/ldap.yml
++
++## Aplicant Playbook servidor (webmin, lnadmin, etc)
+ ansible-playbook "$ANSIBLEPLAY"/server.yml
+ 
+ ## Configurant servidor LDAP
+ cd "$FILES_LINKAT"/
+-sudo "$FILES_LINKAT"/ldap.sh
++sudo "$FILES_LINKAT"/ldap.sh 
++check_errors ldap
++
+ sudo "$FILES_LINKAT"/ldap-auth.sh
++check_errors ldap-auth
+ 
+ ## Configuració servidor SAMBA
+ ansible-playbook "$ANSIBLEPLAY"/smb.yml
+-sudo "$FILES_LINKAT"/ldap-samba.sh
+-sudo "$FILES_LINKAT"/smbldap-populate.sh
++sudo "$FILES_LINKAT"/ldap-samba.sh 
++check_errors ldap-samba
++sudo "$FILES_LINKAT"/smbldap-populate.sh 
++check_errors populate
+ 
+ ## Aplicant Playbook permisos i ACLs unitats
+ ansible-playbook "$ANSIBLEPLAY"/permisos.yml
+@@ -234,6 +261,9 @@ sudo "$FILES_LINKAT"/nextcloud.sh
+ #ansible-playbook "$ANSIBLEPLAY"/onlyoffice.yml
+ #chattr +i /etc/nginx/conf.d/onlyoffice-documentserver.conf
+ 
++# Flag d'instal·lació
++echo servidor > /etc/modalitat_linkat
++
+ yad --width=300 --title="Linkat Servidor de centre" --text="\nLa configuració ha estat aplicada.\n\nEl Servidor de centre s'ha de reiniciar per aplicar els canvis.\n\nVoleu reiniciar-lo ara?" \
+ --image="/usr/share/linkat/linkat-servidor/linkat-servidor-banner.png" \
+ --button="D'acord" --button="Cancel·la":11
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/ldap-auth.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/ldap-auth.sh
+@@ -1,8 +1,17 @@
+ #!/bin/bash
+ ## LDAP Authentication
+ 
++check()
++{
++if  [ ! "$?" -eq 0 ]; then
++        exit 22
++fi
++}
++
+ # debconf-set-selections ldap-auth-config
+ # check /etc/ldap.secret
+ sudo auth-client-config -t nss -p lac_ldap
+-sudo pam-auth-update
++check
+ 
++sudo pam-auth-update
++check
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/ldap-samba.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/ldap-samba.sh
+@@ -1,14 +1,27 @@
+ #!/bin/bash
+ 
++check()
++{
++if  [ ! "$?" -eq 0 ]; then
++        exit 22
++fi
++}
++
+ ###SAMBA###
+ sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f samba.ldif
++check
++
+ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f samba_indices.ldif
++check
+ 
+ sudo smbpasswd -w __PASSROOT__
++check
+ 
+ /usr/share/linkat/linkat-servidor/configurador/files/smbldap-populate.sh
++check
+ 
+ sudo auth-client-config -t nss -p lac_ldap
++check
+ 
+ #LOCALSID=$(sudo net getlocalsid | awk ' {print $6} ')
+ #sed -i s/__GETLOCALSID__/"$LOCALSID"/g /etc/smbldap-tools/smbldap.conf
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/ldap.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/ldap.sh
+@@ -1,21 +1,41 @@
+ #!/bin/bash
+ 
++check()
++{
++if  [ ! "$?" -eq 0 ]; then
++	exit 22
++fi
++}
++
+ ldapadd -x -D cn=admin,dc=__DOMAIN__ -w __PASSROOT__ -f ldapconfig.ldif
++check
++
+ ldapadd -x -D cn=admin,dc=__DOMAIN__ -w __PASSROOT__ -f grups.ldif
++check
++
+ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f uid_index.ldif
++check
++
+ sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f corba.ldif
++check
++
+ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f logging.ldif
++check
++
+ sudo systemctl restart syslog.service
+ 
+ sudo sh -c "certtool --generate-privkey > /etc/ssl/private/cakey.pem"
++check
+ sudo certtool --generate-self-signed \
+        --load-privkey /etc/ssl/private/cakey.pem \
+        --template /etc/ssl/ca.info \
+        --outfile /etc/ssl/certs/cacert.pem
++check
+ 
+ sudo certtool --generate-privkey \
+ 	--sec-param Medium \
+ 	--outfile /etc/ssl/private/servidor_slapd_key.pem
++check
+ 
+ sudo certtool --generate-certificate \
+ 	--load-privkey /etc/ssl/private/servidor_slapd_key.pem \
+@@ -23,11 +43,19 @@ sudo certtool --generate-certificate \
+ 	--load-ca-privkey /etc/ssl/private/cakey.pem \
+ 	--template /etc/ssl/servidor.info \
+ 	--outfile /etc/ssl/certs/servidor_slapd_cert.pem
++check
+ 
+ sudo chgrp openldap /etc/ssl/private/servidor_slapd_key.pem
++check
++
+ sudo chmod 0640 /etc/ssl/private/servidor_slapd_key.pem
++check
++
+ sudo gpasswd -a openldap ssl-cert
++check
+ 
+ sudo systemctl restart slapd.service
++check
+ 
+ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f certinfo.ldif
++check
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/nextcloud.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/nextcloud.sh
+@@ -1,4 +1,5 @@
+ ## Nextcloud
++
+ sudo snap install nextcloud
+ nextcloud.manual-install lnadmin __PASSLNADMIN__
+ sudo nextcloud.enable-https self-signed
