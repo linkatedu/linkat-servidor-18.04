@@ -1,0 +1,381 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-6) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-08-09
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/ldap/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/ldap/tasks/main.yml
+@@ -37,6 +37,12 @@
+ - name: Copiant fitxers de configuració LDAP client
+   copy: src=files/libnss-ldap.conf dest=/etc/libnss-ldap.conf
+ 
++- name: Copiant fitxers de configuració SMBLDAP
++  copy: src=files/smbldap.conf dest=/etc/smbldap-tools/smbldap.conf
++
++- name: Copiant fitxers de configuració SMBLDAP
++  copy: src=files/smbldap_bind.conf dest=/etc/smbldap-tools/smbldap_bind.conf
++
+ - file:
+         path: /usr/share/lightdm/lightdm.conf.d/80-linkat-server-lightdm.conf
+         owner: root
+@@ -67,6 +73,19 @@
+         group: root
+         mode: 0644
+ 
++- file:
++        path: /etc/smbldap-tools/smbldap.conf
++        owner: root
++        group: root
++        mode: 0644
++
++- file:
++        path: /etc/smbldap-tools/smbldap_bind.conf
++        owner: root
++        group: root
++        mode: 0600
++
++
+ - name: Activant servei LDAP
+   service: name=slapd state=started enabled=yes
+   notify: restart slapd
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -198,7 +198,19 @@ ansible-playbook "$ANSIBLEPLAY"/server.y
+ ## Configurant servidor LDAP
+ cd "$FILES_LINKAT"/
+ ./ldap.sh
++./smbldap-populate.sh
++
+ 
+ ## Aplicant Playbook permisos
+ ansible-playbook "$ANSIBLEPLAY"/permisos.yml
+ sudo chmod -R +x /srv/exports/*
++
++## Nextcloud
++sudo snap install nextcloud
++nextcloud.manual-install lnadmin linkat
++sudo nextcloud.enable-https self-signed
++sudo snap set nextcloud ports.http=81
++sudo snap set nextcloud ports.https=10443
++
++## Onlyoffice
++/usr/share/linkat/linkat-onlyoffice/linkat-onlyoffice.sh
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/debconf.slapd
++++ linkat-servidor-18.04/linkat-servidor/plantilles/debconf.slapd
+@@ -16,4 +16,4 @@ slapd	slapd/ppolicy_schema_needs_update
+ slapd	slapd/backend	select	MDB
+ slapd	slapd/move_old_database	boolean	true
+ # Desitjau que s'elimini la base de dades en purgar el paquet slapd?
+-slapd	slapd/purge_database	boolean	false
++slapd	slapd/purge_database	boolean true	
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/ldap.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/ldap.sh
+@@ -1,6 +1,5 @@
+ #!/bin/bash
+ 
+-
+ ldapadd -x -D cn=admin,dc=__DOMAIN__ -w __PASSROOT__ -f ldapconfig.ldif
+ ldapadd -x -D cn=admin,dc=__DOMAIN__ -w __PASSROOT__ -f grups.ldif
+ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f uid_index.ldif
+@@ -24,13 +23,11 @@ sudo ldapmodify -Y EXTERNAL -H ldapi:///
+ ### Samba LDAP START ###
+ sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f samba.ldif
+ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f samba_indices.ldif
+-sudo smbldap-config
+-sudo smbldap-populate -g 10000 -u 10000 -r 10000
+ ### Samba LDAP  END  ###
+ 
+-#sudo debconf-set-selections /usr/share/linkat/linkat-servidor/configurador/files/debconf.ldap-auth-config
+-#sudo debconf-set-selections /usr/share/linkat/linkat-servidor/configurador/files/debconf.auth-client-config
+-#sudo DEBIAN_FRONTEND=noninteractive apt install -y -q ldap-auth-config auth-client-config libnss-ldap
++LOCALSID=$(sudo net getlocalsid | awk ' {print $6} ')
++sed -i s/__GETLOCALSID__/"$LOCALSID"/g smbldap.conf
++sed -i s/__GETLOCALSID__/"$LOCALSID"/g /etc/smbldap-tools/smbldap.conf
+ 
+ sudo auth-client-config -t nss -p lac_ldap
+ 
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/smb-ldap.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/smb-ldap.conf
+@@ -8,7 +8,7 @@
+         ## Method 1:
+         ldap password sync = yes
+         ## Method 2:
+-        ;ldap password sync = no
++        ;ldap password sync = yes 
+         ;unix password sync = yes
+         ;passwd program = /usr/sbin/smbldap-passwd -u '%u'
+         ;passwd chat = "Changing *\nNew password*" %n\n "*Retype new password*" %n\n"
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/smbldap-populate.sh
+@@ -0,0 +1,10 @@
++#!/usr/bin/expect -f
++
++spawn smbldap-populate -g 10000 -u 10000 -r 10000 
++expect "New password:"
++send -- "$NEW_PASSROOT\r"
++
++expect "Retype new password:"
++send -- "$NEW_PASSROOT\r"
++
++expect eof
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/smbldap.conf
+@@ -0,0 +1,223 @@
++
++# smbldap-tools.conf : Q & D configuration file for smbldap-tools
++
++#  This code was developed by IDEALX (http://IDEALX.org/) and
++#  contributors (their names can be found in the CONTRIBUTORS file).
++#
++#                 Copyright (C) 2001-2002 IDEALX
++#
++#  This program is free software; you can redistribute it and/or
++#  modify it under the terms of the GNU General Public License
++#  as published by the Free Software Foundation; either version 2
++#  of the License, or (at your option) any later version.
++#
++#  This program is distributed in the hope that it will be useful,
++#  but WITHOUT ANY WARRANTY; without even the implied warranty of
++#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#  GNU General Public License for more details.
++#
++#  You should have received a copy of the GNU General Public License
++#  along with this program; if not, write to the Free Software
++#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
++#  USA.
++
++#  Purpose :
++#       . be the configuration file for all smbldap-tools scripts
++
++##############################################################################
++#
++# General Configuration
++#
++##############################################################################
++
++# Put your own SID. To obtain this number do: "net getlocalsid".
++# If not defined, parameter is taking from "net getlocalsid" return
++SID="__GETLOCALSID__"
++
++# Domain name the Samba server is in charged.
++# If not defined, parameter is taking from smb.conf configuration file
++# Ex: sambaDomain="IDEALX-NT"
++sambaDomain="__DOMAIN__"
++
++##############################################################################
++#
++# LDAP Configuration
++#
++##############################################################################
++
++# Notes: to use to dual ldap servers backend for Samba, you must patch
++# Samba with the dual-head patch from IDEALX. If not using this patch
++# just use the same server for slaveLDAP and masterLDAP.
++# Those two servers declarations can also be used when you have 
++# . one master LDAP server where all writing operations must be done
++# . one slave LDAP server where all reading operations must be done
++#   (typically a replication directory)
++
++# Slave LDAP server
++# Ex: slaveLDAP=127.0.0.1
++# If not defined, parameter is set to "127.0.0.1"
++slaveLDAP="127.0.0.1"
++
++# Slave LDAP port
++# If not defined, parameter is set to "389"
++slavePort="389"
++
++# Master LDAP server: needed for write operations
++# Ex: masterLDAP=127.0.0.1
++# If not defined, parameter is set to "127.0.0.1"
++masterLDAP="127.0.0.1"
++
++# Master LDAP port
++# If not defined, parameter is set to "389"
++masterPort="389"
++
++# Use TLS for LDAP
++# If set to 1, this option will use start_tls for connection
++# (you should also used the port 389)
++# If not defined, parameter is set to "1"
++ldapTLS="0"
++
++# How to verify the server's certificate (none, optional or require)
++# see "man Net::LDAP" in start_tls section for more details
++verify=""
++
++# CA certificate
++# see "man Net::LDAP" in start_tls section for more details
++cafile=""
++
++# certificate to use to connect to the ldap server
++# see "man Net::LDAP" in start_tls section for more details
++clientcert=""
++
++# key certificate to use to connect to the ldap server
++# see "man Net::LDAP" in start_tls section for more details
++clientkey=""
++
++# LDAP Suffix
++# Ex: suffix=dc=IDEALX,dc=ORG
++suffix="dc=__DOMAIN__"
++
++# Where are stored Users
++# Ex: usersdn="ou=Users,dc=IDEALX,dc=ORG"
++# Warning: if 'suffix' is not set here, you must set the full dn for usersdn
++usersdn="ou=People,${suffix}"
++
++# Where are stored Computers
++# Ex: computersdn="ou=Computers,dc=IDEALX,dc=ORG"
++# Warning: if 'suffix' is not set here, you must set the full dn for computersdn
++computersdn="ou=Computers,${suffix}"
++
++# Where are stored Groups
++# Ex: groupsdn="ou=Groups,dc=IDEALX,dc=ORG"
++# Warning: if 'suffix' is not set here, you must set the full dn for groupsdn
++groupsdn="ou=group,${suffix}"
++
++# Where are stored Idmap entries (used if samba is a domain member server)
++# Ex: groupsdn="ou=Idmap,dc=IDEALX,dc=ORG"
++# Warning: if 'suffix' is not set here, you must set the full dn for idmapdn
++idmapdn="ou=Idmap,${suffix}"
++
++# Where to store next uidNumber and gidNumber available for new users and groups
++# If not defined, entries are stored in sambaDomainName object.
++# Ex: sambaUnixIdPooldn="sambaDomainName=${sambaDomain},${suffix}"
++# Ex: sambaUnixIdPooldn="cn=NextFreeUnixId,${suffix}"
++sambaUnixIdPooldn="sambaDomainName=__DOMAIN__,${suffix}"
++
++# Default scope Used
++scope="sub"
++
++# Unix password encryption (CRYPT, MD5, SMD5, SSHA, SHA, CLEARTEXT)
++hash_encrypt="SSHA"
++
++# if hash_encrypt is set to CRYPT, you may set a salt format.
++# default is "%s", but many systems will generate MD5 hashed
++# passwords if you use "$1$%.8s". This parameter is optional!
++crypt_salt_format=""
++
++##############################################################################
++# 
++# Unix Accounts Configuration
++# 
++##############################################################################
++
++# Login defs
++# Default Login Shell
++# Ex: userLoginShell="/bin/bash"
++userLoginShell="/bin/bash"
++
++# Home directory
++# Ex: userHome="/home/%U"
++userHome="/home/%U"
++
++# Default mode used for user homeDirectory
++userHomeDirectoryMode="700"
++
++# Gecos
++userGecos="System User"
++
++# Default User (POSIX and Samba) GID
++defaultUserGid="513"
++
++# Default Computer (Samba) GID
++defaultComputerGid="515"
++
++# Skel dir
++skeletonDir="/etc/skel"
++
++# Default password validation time (time in days) Comment the next line if
++# you don't want password to be enable for defaultMaxPasswordAge days (be
++# careful to the sambaPwdMustChange attribute's value)
++defaultMaxPasswordAge="45"
++
++##############################################################################
++#
++# SAMBA Configuration
++#
++##############################################################################
++
++# The UNC path to home drives location (%U username substitution)
++# Just set it to a null string if you want to use the smb.conf 'logon home'
++# directive and/or disable roaming profiles
++# Ex: userSmbHome="\\PDC-SMB3\%U"
++userSmbHome="\\__NAME__\%U"
++
++# The UNC path to profiles locations (%U username substitution)
++# Just set it to a null string if you want to use the smb.conf 'logon path'
++# directive and/or disable roaming profiles
++# Ex: userProfile="\\PDC-SMB3\profiles\%U"
++userProfile="\\__NAME__\profiles\%U"
++
++# The default Home Drive Letter mapping
++# (will be automatically mapped at logon time if home directory exist)
++# Ex: userHomeDrive="H:"
++userHomeDrive="H"
++
++# The default user netlogon script name (%U username substitution)
++# if not used, will be automatically username.cmd
++# make sure script file is edited under dos
++# Ex: userScript="startup.cmd" # make sure script file is edited under dos
++userScript="%U"
++
++# Domain appended to the users "mail"-attribute
++# when smbldap-useradd -M is used
++# Ex: mailDomain="idealx.com"
++mailDomain=""
++
++##############################################################################
++#
++# SMBLDAP-TOOLS Configuration (default are ok for a RedHat)
++#
++##############################################################################
++
++# Allows not to use smbpasswd (if with_smbpasswd="0" in smbldap.conf) but
++# prefer Crypt::SmbHash library
++with_smbpasswd="0"
++smbpasswd="/usr/bin/smbpasswd"
++
++# Allows not to use slappasswd (if with_slappasswd="0" in smbldap.conf)
++# but prefer Crypt:: libraries
++with_slappasswd="0"
++slappasswd="/usr/sbin/slappasswd"
++
++# comment out the following line to get rid of the default banner
++# no_banner="1"
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/smbldap_bind.conf
+@@ -0,0 +1,12 @@
++
++############################
++# Credential Configuration #
++############################
++# Note: you can specify two different configurations if you use a
++# master ldap for writing access and a slave ldap server for reading access
++# By default, we will use the same DN (so it will work for standard Samba
++# release)
++slaveDN="cn=admin,dc=__DOMAIN__"
++slavePw="__PASSROOT__"
++masterDN="cn=admin,dc=__DOMAIN__"
++masterPw="__PASSROOT__"
