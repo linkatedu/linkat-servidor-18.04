@@ -1,0 +1,100 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-60) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2019-02-14
+
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/docker/tasks/main.yml
+@@ -0,0 +1,18 @@
++---
++- name: Copiant fitxers de configuració FOG 
++  copy: src=files/docker.fogproject.service dest=/etc/systemd/system/
++
++- name: Copiant fitxers de configuració dnsmasq-fog
++  copy: src=files/docker.dnsmasqfog.service dest=/etc/systemd/system/
++
++- file:
++        path: /etc/systemd/system/docker.fogproject.service
++        owner: root
++        group: root
++        mode: 0644
++
++- file:
++        path: /etc/systemd/system/docker.dnsmasqfog.service
++        owner: root
++        group: root
++        mode: 0644
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/unitats/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/unitats/tasks/main.yml
+@@ -127,3 +127,10 @@
+         group: root
+         mode: 6770
+ 
++- name: Verificant unitats Maquetes
++  file:
++        path: /srv/exports/maquetes/fog
++        state: directory
++        owner: root
++        group: root
++        mode: 06777
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/server.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/server.yml
+@@ -12,6 +12,6 @@
+     - dlna
+     - webmin
+     - clamav
+-    - fog
++    - docker
+     - jclic
+     - nginx
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/docker.dnsmasqfog.service
+@@ -0,0 +1,15 @@
++[Unit]
++Description=dnsmasq-fog Service
++After=docker.service
++Requires=docker.service
++ 
++[Service]
++TimeoutStartSec=0
++#Restart=always
++ExecStartPre=-/usr/bin/docker stop dnsmasq-fog
++ExecStartPre=-/usr/bin/docker rm dnsmasq-fog
++ExecStartPre=/usr/bin/docker pull linkat/dnsmasq-fog
++ExecStart=/usr/bin/docker run -d --restart=always -p 4011:4011 -p 67:67 --cap-add=NET_ADMIN -e TFTP_SERVER_IP=__IP__ --name dnsmasq-fog linkat/dnsmasq-fog:1.0.0
++ 
++[Install]
++WantedBy=multi-user.target
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/docker.fogproject.service
++++ linkat-servidor-18.04/linkat-servidor/plantilles/docker.fogproject.service
+@@ -8,8 +8,8 @@ TimeoutStartSec=0
+ #Restart=always
+ ExecStartPre=-/usr/bin/docker stop fogproject
+ ExecStartPre=-/usr/bin/docker rm fogproject 
+-ExecStartPre=/usr/bin/docker pull linkat/fogproject
+-ExecStart=/usr/bin/docker run -d -p 20:20 -p 21:21 -p 67:67/udp -p 82:80 -p 69:69/udp --privileged -h dockerfog --name fogproject -v /srv/app/fogproject/mysql:/var/lib/mysql -v /etc/linkat/docker/dnsmasq:/etc/dnsmasq.d/ -e WEB_HOST_PORT=82 -e WEB_HOST_IP=__IP__ linkat/fogproject
++ExecStartPre=/usr/bin/docker pull linkat/fogproject:0.0.1
++ExecStart=/usr/bin/docker run -d --restart=always -e IP=__IP__ -p 82:82 -p 69:69/tcp -p 69:69/udp -p 21:21 -p 9000:9000 -v "/srv/exports/maquetes/fog":"/images" -v "/srv/app/fogproject/mysql":"/var/lib/mysql" -e WEBSERVER_HTTP_PORT=82 --name fogproject linkat/fogproject:1.0.1
+  
+ [Install]
+ WantedBy=multi-user.target
