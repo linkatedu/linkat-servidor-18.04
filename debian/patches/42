@@ -1,0 +1,97 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-42) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-10-23
+
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/ldap-samba.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/ldap-samba.sh
+@@ -23,6 +23,6 @@ check
+ sudo auth-client-config -t nss -p lac_ldap
+ check
+ 
+-#LOCALSID=$(sudo net getlocalsid | awk ' {print $6} ')
+-#sed -i s/__GETLOCALSID__/"$LOCALSID"/g /etc/smbldap-tools/smbldap.conf
++LOCALSID=$(sudo net getlocalsid | awk ' {print $6} ')
++sed -i s/__LOCALSID__/"$LOCALSID"/g /etc/webmin/ldap-useradmin/config
+ 
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/webldap-useradminconfig
++++ linkat-servidor-18.04/linkat-servidor/plantilles/webldap-useradminconfig
+@@ -9,14 +9,14 @@ given=0
+ imap_def=0
+ imap_class=SuSEeMailObject
+ md5=0
+-samba_class=sambaSamAccount
++samba_class= sambaSamAccount
+ given_class=inetOrgPerson
+ shells=fixed,passwd,shells
+ mailfmt=0
+ person=1
+ membox=0
+-slappasswd=slappasswd
+-samba_def=0
++slappasswd=/usr/sbin/slappasswd
++samba_def=1
+ ldap_tls=0
+ gecos=1
+ imap_folders=old	public	sent-mail
+@@ -39,11 +39,11 @@ login=
+ imap_pass=
+ default_warn=
+ pre_command=
+-group_base=ou=Groups,dc=intracentre
++group_base=ou=Groups,dc=__DOMAIN__
+ post_command=
+-other_class=
++other_class=inetOrgPerson
+ base_uid=
+-user_base=ou=People,dc=intracentre
++user_base=ou=People,dc=__DOMAIN__
+ passwd_stars=
+ home_base=
+ mod_props=
+@@ -57,16 +57,16 @@ base_gid=
+ gother_class=
+ default_max=
+ noclash=
+-default_shell=
++default_shell=/bin/bash
+ homedir_perms=
+ maillocaladdress=
+ default_expire=
+ default_group=
+-props=
++props=sn: ${USER}
+ group_fields=
+ default_inactive=
+ home_style=
+ group_filter=
+-samba_domain=
++samba_domain=__LOCALSID__
+ random_password=
+ ldap_host=ldap://127.0.0.1
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/webmin.acl
++++ linkat-servidor-18.04/linkat-servidor/plantilles/webmin.acl
+@@ -1,2 +1,2 @@
+ root: acl adsl-client ajaxterm apache at backup-config bacula-backup bandwidth bind8 burner change-user cluster-copy cluster-cron cluster-passwd cluster-shell cluster-software cluster-useradmin cluster-usermin cluster-webmin cpan cron custom dfsadmin dhcpd dovecot exim exports fail2ban fdisk fetchmail file filemin filter firewall firewall6 firewalld fsdump grub heartbeat htaccess-htpasswd idmapd inetd init inittab ipfilter ipfw ipsec iscsi-client iscsi-server iscsi-target iscsi-tgtd jabber krb5 ldap-client ldap-server ldap-useradmin logrotate lpadmin lvm mailboxes mailcap man mon mount mysql net nis openslp package-updates pam pap passwd phpini postfix postgresql ppp-client pptp-client pptp-server proc procmail proftpd qmailadmin quota raid samba sarg sendmail servers shell shorewall shorewall6 smart-status smf software spam squid sshd status stunnel syslog-ng syslog system-status tcpwrappers telnet time tunnel updown useradmin usermin vgetty webalizer webmin webmincron webminlog wuftpd xinetd
+-lnadmin: system-status ldap-useradmin samba
++lnadmin: system-status ldap-useradmin 
