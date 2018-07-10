@@ -2,7 +2,7 @@
 
 chmod 750 /etc/linkat/linkat-servidor/
 chmod 750 /usr/share/linkat/linkat-servidor/
-chmod 750 /etc/linkat/linkat-servidor/patches/patches.sh
+chmod 750 -R /etc/linkat/linkat-servidor/patches/
 
 #Patches linkat-servidor
 if [ -f /etc/modalitat_linkat ] ; then
