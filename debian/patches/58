@@ -1,0 +1,972 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-58) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2019-01-31
+
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/nginx/tasks/main.yml
+@@ -0,0 +1,13 @@
++---
++- name: Copiant fitxers accés web 
++  copy: src=files/index.html dest=/var/www/html/
++
++- file:
++        path: /var/www/html/index.html
++        owner: root
++        group: root
++        mode: 0644
++
++- name: Activant servei nginx
++  service: name=nginx state=started enabled=yes
++  notify: restart nginx
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/server.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/server.yml
+@@ -14,3 +14,4 @@
+     - clamav
+     - fog
+     - jclic
++    - nginx
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/index.html
+@@ -0,0 +1,378 @@
++<!DOCTYPE html>
++<html>
++<head>
++<meta name="viewport" content="width=device-width, initial-scale=1">
++<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
++<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
++<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
++<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
++<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
++<style>
++* {
++    box-sizing: border-box;
++}
++
++body {
++    margin-top: 50px;
++    background-color: orange;
++    padding: 20px;
++    font-family: Arial;
++    color: #101010;
++}
++
++/* Center website */
++.main {
++    max-width: 1320px;
++    margin: auto;
++}
++
++h1 {
++    font-size: 50px;
++    word-break: break-all;
++}
++
++.row {
++    margin: 10px -16px;
++}
++
++/* Add padding BETWEEN each col */
++.row,
++.row > .col {
++    padding: 8px;
++}
++
++/* Create three equal cols that floats next to each other */
++.col {
++    float: left;
++    width: 33.33%;
++    display: none; /* Hide all elements by default */
++}
++
++/* Clear floats after rows */ 
++.row:after {
++    content: "";
++    display: table;
++    clear: both;
++}
++
++/* Content */
++.content {
++    background-color: white;
++    padding: 10px;
++}
++
++/* The "show" class is added to the filtered elements */
++.show {
++  display: block;
++}
++
++/* Style the buttons */
++.btn {
++  border: none;
++  outline: none;
++  padding: 6px 16px ;
++  background-color: orange;
++  cursor: pointer;
++}
++
++.btn:hover {
++  background-color: #ddd;
++}
++
++.btn.active {
++  background-color: white;
++  /*color: white; */
++}
++
++.image { 
++ width:200px;
++  height:100px;
++  margin-top:20px;
++ }
++
++.card {
++  width:300px; 
++}
++
++/* Style the tab */
++.tab {
++    float: left;
++    border: 1px solid #ccc;
++    background-color: #f1f1f1;
++    width: 30%;
++    height: 200px;
++}
++
++/* Style the buttons inside the tab */
++.tab button {
++    display: block;
++    background-color: inherit;
++    color: black;
++    padding: 22px 16px;
++    width: 100%;
++    border: none;
++    outline: none;
++    text-align: left;
++    cursor: pointer;
++    transition: 0.3s;
++    font-size: 17px;
++}
++
++/* Change background color of buttons on hover */
++.tab button:hover {
++    background-color: #ddd;
++    height: 200px;
++}
++
++/* Create an active/current "tab button" class */
++.tab button.active {
++    background-color: #ccc;
++}
++
++/* Style the tab content */
++.tabcontent {
++    float: left;
++    padding: 0px 12px;
++    border: 1px solid #ccc;
++    width: 70%;
++    border-left: none;
++    /*height: 300px; */
++}
++
++.flip-card {
++  background-color: transparent;
++  width: 300px;
++  height: 125px;
++  perspective: 1000px;
++}
++
++.flip-card-inner {
++  position: relative;
++  width: 100%;
++  height: 100%;
++  text-align: center;
++  transition: transform 0.6s;
++  transform-style: preserve-3d;
++  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
++}
++
++.flip-card:hover .flip-card-inner {
++  transform: rotateY(180deg);
++}
++
++.flip-card-front, .flip-card-back {
++  position: absolute;
++  width: 100%;
++  height: 100%;
++  backface-visibility: hidden;
++}
++
++.flip-card-front {
++  background-color: #000000;
++  color: black;
++}
++
++.flip-card-back {
++  background-color: #000000;
++  color: white;
++  transform: rotateY(180deg);
++  padding: 5px;
++}
++
++</style>
++</head>
++<body>
++
++<!-- MAIN (Center website) -->
++<div class="main">
++
++<h1>Serveis WEB del Servidor de Centre 18.04</h1>
++<hr>
++
++<!--<h2>PORTFOLIO</h2> -->
++
++<div id="myBtnContainer">
++  <button class="btn active" onclick="filterSelection('all')"> Accés als serveis</button>
++</div>
++
++<!-- Portfolio Gallery Grid -->
++<div class="row">
++   <div class="col cat1">
++      <div class="card">
++          <div class="flip-card">
++            <div class="flip-card-inner">
++              <div class="flip-card-front">
++                <img class="image" src="webmin-logo.svg">
++              </div>
++              <div class="flip-card-back">
++                <h4><b>Webmin</b></h4> 
++                <br>
++                <a href="https://__IP__:10000" class="btn btn-primary">https://__IP__:10000</a>
++              </div>
++            </div>
++          </div>
++        <div class="card-body">
++          <h4 class="card-title">Gestió del servidor</h4>
++          <a href="https://__IP__:10000" class="btn btn-primary">Accés</a>
++        </div>
++      </div>
++  </div>
++  <div class="col cat1">
++      <div class="card">
++          <div class="flip-card">
++            <div class="flip-card-inner">
++              <div class="flip-card-front">
++                <img class="image" src="calibre-logo.svg">
++              </div>
++              <div class="flip-card-back">
++                <h4><b>Servei Calibre</b></h4> 
++                <br>
++                <a href="http://__IP__:8081" class="btn btn-primary">http://__IP__:8081</a>
++              </div>
++            </div>
++          </div>
++        <div class="card-body">
++          <h4 class="card-title">Catàleg digital</h4>
++          <a href="http://__IP__:8081" class="btn btn-primary">Accés</a>
++        </div>
++      </div>
++  </div>
++  <div class="col cat1">
++      <div class="card">
++          <div class="flip-card">
++            <div class="flip-card-inner">
++              <div class="flip-card-front">
++                <img class="image" src="jclic-logo.svg">
++              </div>
++              <div class="flip-card-back">
++                <h4><b>Servidor d'informes JClic</b></h4>
++                <br>
++                <a href="http://__IP__:8080/reports" class="btn btn-primary">http://__IP__:8080/reports</a>
++              </div>
++            </div>
++          </div>
++        <div class="card-body">
++          <h4 class="card-title">Informes del JClic</h4>
++          <a href="http://__IP__:8080/reports" class="btn btn-primary">Accés</a>
++        </div>
++      </div>
++  </div>
++    <div class="col cat1">
++      <div class="card">
++          <div class="flip-card">
++            <div class="flip-card-inner">
++              <div class="flip-card-front">
++                <img class="image" src="nextcloud-logo.svg">
++              </div>
++              <div class="flip-card-back">
++                <h4><b>Nextcloud</b></h4> 
++                <br>
++                <a href="https://__IP__:10443" class="btn btn-primary">https://__IP__:10443</a>
++              </div>
++            </div>
++          </div>
++        <div class="card-body">
++          <h4 class="card-title">Servei al núvol</h4>
++          <a href="https://__IP__:10443" class="btn btn-primary">Accés</a>
++        </div>
++      </div>
++  </div>
++   <div class="col cat1">
++      <div class="card">
++          <div class="flip-card">
++            <div class="flip-card-inner">
++              <div class="flip-card-front">
++                <img class="image" src="onlyoffice-logo.svg">
++              </div>
++              <div class="flip-card-back">
++                <h4><b>Onlyoffice</b></h4> 
++                <br>
++                <a href="https://__IP__:10445" class="btn btn-primary">https://__IP__:10445</a>
++              </div>
++            </div>
++          </div>
++        <div class="card-body">
++          <h4 class="card-title">Paquet ofimàtic al núvol</h4>
++          <a href="https://__IP__:10445" class="btn btn-primary">Accés</a>
++        </div>
++      </div>
++  </div>
++     <div class="col cat1">
++      <div class="card">
++          <div class="flip-card">
++            <div class="flip-card-inner">
++              <div class="flip-card-front">
++                <img class="image" src="fog-logo.svg">
++              </div>
++              <div class="flip-card-back">
++                <h4><b>FOG</b></h4> 
++                <br>
++                <a href="http://__IP__:82/fog" class="btn btn-primary">http://__IP__:82/fog</a>
++              </div>
++            </div>
++          </div>
++        <div class="card-body">
++          <h4 class="card-title">Servei de clonació</h4>
++          <a href="http://__IP__:82/fog" class="btn btn-primary">Accés</a>
++        </div>
++      </div>
++  </div>
++ <!-- Categories buïdes per ajustar les capses dels diferents serveis web -->
++    <div class="col cat1">
++    </div>
++    <div class="col cat1">
++    </div>
++<!-- END GRID -->
++</div>
++
++<!-- END MAIN -->
++</div>
++
++<script>
++filterSelection("all")
++function filterSelection(c) {
++  var x, i;
++  x = document.getElementsByClassName("col");
++  if (c == "all") c = "";
++  for (i = 0; i < x.length; i++) {
++    w3RemoveClass(x[i], "show");
++    if (x[i].className.indexOf(c) > -1) w3AddClass(x[i], "show");
++  }
++}
++
++function w3AddClass(element, name) {
++  var i, arr1, arr2;
++  arr1 = element.className.split(" ");
++  arr2 = name.split(" ");
++  for (i = 0; i < arr2.length; i++) {
++    if (arr1.indexOf(arr2[i]) == -1) {element.className += " " + arr2[i];}
++  }
++}
++
++function w3RemoveClass(element, name) {
++  var i, arr1, arr2;
++  arr1 = element.className.split(" ");
++  arr2 = name.split(" ");
++  for (i = 0; i < arr2.length; i++) {
++    while (arr1.indexOf(arr2[i]) > -1) {
++      arr1.splice(arr1.indexOf(arr2[i]), 1);     
++    }
++  }
++  element.className = arr1.join(" ");
++}
++
++
++// Add active class to the current button (highlight it)
++var btnContainer = document.getElementById("myBtnContainer");
++var btns = btnContainer.getElementsByClassName("btn");
++for (var i = 0; i < btns.length; i++) {
++  btns[i].addEventListener("click", function(){
++    var current = document.getElementsByClassName("active");
++    current[0].className = current[0].className.replace(" active", "");
++    this.className += " active";
++  });
++}
++</script>
++
++</body>
++</html>
+--- /dev/null
++++ linkat-servidor-18.04/web/calibre-logo.svg
+@@ -0,0 +1,75 @@
++<?xml version="1.0" encoding="UTF-8" standalone="no"?>
++<!-- Created with Inkscape (http://www.inkscape.org/) -->
++
++<svg
++   xmlns:dc="http://purl.org/dc/elements/1.1/"
++   xmlns:cc="http://creativecommons.org/ns#"
++   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
++   xmlns:svg="http://www.w3.org/2000/svg"
++   xmlns="http://www.w3.org/2000/svg"
++   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
++   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
++   width="200"
++   height="100"
++   viewBox="0 0 52.916666 26.458333"
++   version="1.1"
++   id="svg8"
++   inkscape:version="0.92.3 (2405546, 2018-03-11)"
++   sodipodi:docname="calibre-logo.svg"
++   inkscape:export-filename="/home/suport/Escriptori/web/jclic-logo.png"
++   inkscape:export-xdpi="96"
++   inkscape:export-ydpi="96">
++  <defs
++     id="defs2" />
++  <sodipodi:namedview
++     id="base"
++     pagecolor="#ffffff"
++     bordercolor="#666666"
++     borderopacity="1.0"
++     inkscape:pageopacity="0.0"
++     inkscape:pageshadow="2"
++     inkscape:zoom="2.6373875"
++     inkscape:cx="-32.046614"
++     inkscape:cy="108.85839"
++     inkscape:document-units="mm"
++     inkscape:current-layer="layer1"
++     showgrid="false"
++     inkscape:measure-start="0,0"
++     inkscape:measure-end="0,0"
++     width="200mm"
++     units="px"
++     inkscape:window-width="1920"
++     inkscape:window-height="992"
++     inkscape:window-x="0"
++     inkscape:window-y="24"
++     inkscape:window-maximized="1" />
++  <metadata
++     id="metadata5">
++    <rdf:RDF>
++      <cc:Work
++         rdf:about="">
++        <dc:format>image/svg+xml</dc:format>
++        <dc:type
++           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
++        <dc:title />
++      </cc:Work>
++    </rdf:RDF>
++  </metadata>
++  <g
++     inkscape:label="Capa 1"
++     inkscape:groupmode="layer"
++     id="layer1"
++     transform="translate(0,-270.54167)">
++    <text
++       xml:space="preserve"
++       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.34722233px;line-height:125%;font-family:Carlito;-inkscape-font-specification:'Carlito, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffa500;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
++       x="8.6157541"
++       y="288.0574"
++       id="text817"><tspan
++         sodipodi:role="line"
++         id="tspan815"
++         x="8.6157541"
++         y="288.0574"
++         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.34722233px;font-family:Carlito;-inkscape-font-specification:'Carlito, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffa500;stroke-width:0.34999999;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">Calibre</tspan></text>
++  </g>
++</svg>
+--- /dev/null
++++ linkat-servidor-18.04/web/fog-logo.svg
+@@ -0,0 +1,75 @@
++<?xml version="1.0" encoding="UTF-8" standalone="no"?>
++<!-- Created with Inkscape (http://www.inkscape.org/) -->
++
++<svg
++   xmlns:dc="http://purl.org/dc/elements/1.1/"
++   xmlns:cc="http://creativecommons.org/ns#"
++   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
++   xmlns:svg="http://www.w3.org/2000/svg"
++   xmlns="http://www.w3.org/2000/svg"
++   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
++   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
++   width="200"
++   height="100"
++   viewBox="0 0 52.916666 26.458333"
++   version="1.1"
++   id="svg8"
++   inkscape:version="0.92.3 (2405546, 2018-03-11)"
++   sodipodi:docname="fog-logo.svg"
++   inkscape:export-filename="/home/suport/Escriptori/web/webmin-logo.png"
++   inkscape:export-xdpi="96"
++   inkscape:export-ydpi="96">
++  <defs
++     id="defs2" />
++  <sodipodi:namedview
++     id="base"
++     pagecolor="#ffffff"
++     bordercolor="#666666"
++     borderopacity="1.0"
++     inkscape:pageopacity="0.0"
++     inkscape:pageshadow="2"
++     inkscape:zoom="3.9257124"
++     inkscape:cx="117.03243"
++     inkscape:cy="68.482778"
++     inkscape:document-units="mm"
++     inkscape:current-layer="layer1"
++     showgrid="false"
++     inkscape:measure-start="0,0"
++     inkscape:measure-end="0,0"
++     width="200mm"
++     units="px"
++     inkscape:window-width="1920"
++     inkscape:window-height="992"
++     inkscape:window-x="0"
++     inkscape:window-y="24"
++     inkscape:window-maximized="1" />
++  <metadata
++     id="metadata5">
++    <rdf:RDF>
++      <cc:Work
++         rdf:about="">
++        <dc:format>image/svg+xml</dc:format>
++        <dc:type
++           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
++        <dc:title></dc:title>
++      </cc:Work>
++    </rdf:RDF>
++  </metadata>
++  <g
++     inkscape:label="Capa 1"
++     inkscape:groupmode="layer"
++     id="layer1"
++     transform="translate(0,-270.54167)">
++    <text
++       xml:space="preserve"
++       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:17.63888931px;line-height:125%;font-family:Expressa-Serial;-inkscape-font-specification:'Expressa-Serial, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffa500;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
++       x="13.403764"
++       y="288.15411"
++       id="text817"><tspan
++         sodipodi:role="line"
++         id="tspan815"
++         x="13.403764"
++         y="288.15411"
++         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:17.63888931px;font-family:Expressa-Serial;-inkscape-font-specification:'Expressa-Serial, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffa500;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">Fog</tspan></text>
++  </g>
++</svg>
+--- /dev/null
++++ linkat-servidor-18.04/web/jclic-logo.svg
+@@ -0,0 +1,75 @@
++<?xml version="1.0" encoding="UTF-8" standalone="no"?>
++<!-- Created with Inkscape (http://www.inkscape.org/) -->
++
++<svg
++   xmlns:dc="http://purl.org/dc/elements/1.1/"
++   xmlns:cc="http://creativecommons.org/ns#"
++   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
++   xmlns:svg="http://www.w3.org/2000/svg"
++   xmlns="http://www.w3.org/2000/svg"
++   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
++   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
++   width="200"
++   height="100"
++   viewBox="0 0 52.916666 26.458333"
++   version="1.1"
++   id="svg8"
++   inkscape:version="0.92.3 (2405546, 2018-03-11)"
++   sodipodi:docname="jclic-logo.svg"
++   inkscape:export-filename="/home/suport/Escriptori/web/jclic-logo.png"
++   inkscape:export-xdpi="96"
++   inkscape:export-ydpi="96">
++  <defs
++     id="defs2" />
++  <sodipodi:namedview
++     id="base"
++     pagecolor="#ffffff"
++     bordercolor="#666666"
++     borderopacity="1.0"
++     inkscape:pageopacity="0.0"
++     inkscape:pageshadow="2"
++     inkscape:zoom="2.6373875"
++     inkscape:cx="23.394673"
++     inkscape:cy="141.31975"
++     inkscape:document-units="mm"
++     inkscape:current-layer="layer1"
++     showgrid="false"
++     inkscape:measure-start="0,0"
++     inkscape:measure-end="0,0"
++     width="200mm"
++     units="px"
++     inkscape:window-width="1920"
++     inkscape:window-height="992"
++     inkscape:window-x="0"
++     inkscape:window-y="24"
++     inkscape:window-maximized="1" />
++  <metadata
++     id="metadata5">
++    <rdf:RDF>
++      <cc:Work
++         rdf:about="">
++        <dc:format>image/svg+xml</dc:format>
++        <dc:type
++           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
++        <dc:title />
++      </cc:Work>
++    </rdf:RDF>
++  </metadata>
++  <g
++     inkscape:label="Capa 1"
++     inkscape:groupmode="layer"
++     id="layer1"
++     transform="translate(0,-270.54167)">
++    <text
++       xml:space="preserve"
++       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.34722233px;line-height:125%;font-family:Carlito;-inkscape-font-specification:'Carlito, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffa500;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
++       x="15.539965"
++       y="288.0574"
++       id="text817"><tspan
++         sodipodi:role="line"
++         id="tspan815"
++         x="15.539965"
++         y="288.0574"
++         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.34722233px;font-family:Carlito;-inkscape-font-specification:'Carlito, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffa500;stroke-width:0.34999999;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">JClic</tspan></text>
++  </g>
++</svg>
+--- /dev/null
++++ linkat-servidor-18.04/web/nextcloud-logo.svg
+@@ -0,0 +1,75 @@
++<?xml version="1.0" encoding="UTF-8" standalone="no"?>
++<!-- Created with Inkscape (http://www.inkscape.org/) -->
++
++<svg
++   xmlns:dc="http://purl.org/dc/elements/1.1/"
++   xmlns:cc="http://creativecommons.org/ns#"
++   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
++   xmlns:svg="http://www.w3.org/2000/svg"
++   xmlns="http://www.w3.org/2000/svg"
++   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
++   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
++   width="200"
++   height="100"
++   viewBox="0 0 52.916666 26.458333"
++   version="1.1"
++   id="svg8"
++   inkscape:version="0.92.3 (2405546, 2018-03-11)"
++   sodipodi:docname="nextcloud-logo.svg"
++   inkscape:export-filename="/home/suport/Escriptori/web/jclic-logo.png"
++   inkscape:export-xdpi="96"
++   inkscape:export-ydpi="96">
++  <defs
++     id="defs2" />
++  <sodipodi:namedview
++     id="base"
++     pagecolor="#ffffff"
++     bordercolor="#666666"
++     borderopacity="1.0"
++     inkscape:pageopacity="0.0"
++     inkscape:pageshadow="2"
++     inkscape:zoom="4.7801565"
++     inkscape:cx="95.61381"
++     inkscape:cy="74.1664"
++     inkscape:document-units="mm"
++     inkscape:current-layer="layer1"
++     showgrid="false"
++     inkscape:measure-start="0,0"
++     inkscape:measure-end="0,0"
++     width="200mm"
++     units="px"
++     inkscape:window-width="1920"
++     inkscape:window-height="992"
++     inkscape:window-x="0"
++     inkscape:window-y="24"
++     inkscape:window-maximized="1" />
++  <metadata
++     id="metadata5">
++    <rdf:RDF>
++      <cc:Work
++         rdf:about="">
++        <dc:format>image/svg+xml</dc:format>
++        <dc:type
++           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
++        <dc:title />
++      </cc:Work>
++    </rdf:RDF>
++  </metadata>
++  <g
++     inkscape:label="Capa 1"
++     inkscape:groupmode="layer"
++     id="layer1"
++     transform="translate(0,-270.54167)">
++    <text
++       xml:space="preserve"
++       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.34722222px;line-height:125%;font-family:Carlito;-inkscape-font-specification:'Carlito, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffa500;stroke-width:0.35;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
++       x="0.44656962"
++       y="288.0574"
++       id="text817"><tspan
++         sodipodi:role="line"
++         id="tspan815"
++         x="0.44656962"
++         y="288.0574"
++         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.34722222px;font-family:Carlito;-inkscape-font-specification:'Carlito, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffa500;stroke-width:0.35;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">Nextcloud</tspan></text>
++  </g>
++</svg>
+--- /dev/null
++++ linkat-servidor-18.04/web/onlyoffice-logo.svg
+@@ -0,0 +1,75 @@
++<?xml version="1.0" encoding="UTF-8" standalone="no"?>
++<!-- Created with Inkscape (http://www.inkscape.org/) -->
++
++<svg
++   xmlns:dc="http://purl.org/dc/elements/1.1/"
++   xmlns:cc="http://creativecommons.org/ns#"
++   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
++   xmlns:svg="http://www.w3.org/2000/svg"
++   xmlns="http://www.w3.org/2000/svg"
++   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
++   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
++   width="200"
++   height="100"
++   viewBox="0 0 52.916666 26.458333"
++   version="1.1"
++   id="svg8"
++   inkscape:version="0.92.3 (2405546, 2018-03-11)"
++   sodipodi:docname="onlyoffice-logo.svg"
++   inkscape:export-filename="/home/suport/Escriptori/web/jclic-logo.png"
++   inkscape:export-xdpi="96"
++   inkscape:export-ydpi="96">
++  <defs
++     id="defs2" />
++  <sodipodi:namedview
++     id="base"
++     pagecolor="#ffffff"
++     bordercolor="#666666"
++     borderopacity="1.0"
++     inkscape:pageopacity="0.0"
++     inkscape:pageshadow="2"
++     inkscape:zoom="4.7951327"
++     inkscape:cx="113.38375"
++     inkscape:cy="75.106227"
++     inkscape:document-units="mm"
++     inkscape:current-layer="layer1"
++     showgrid="false"
++     inkscape:measure-start="0,0"
++     inkscape:measure-end="0,0"
++     width="200mm"
++     units="px"
++     inkscape:window-width="1920"
++     inkscape:window-height="992"
++     inkscape:window-x="0"
++     inkscape:window-y="24"
++     inkscape:window-maximized="1" />
++  <metadata
++     id="metadata5">
++    <rdf:RDF>
++      <cc:Work
++         rdf:about="">
++        <dc:format>image/svg+xml</dc:format>
++        <dc:type
++           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
++        <dc:title></dc:title>
++      </cc:Work>
++    </rdf:RDF>
++  </metadata>
++  <g
++     inkscape:label="Capa 1"
++     inkscape:groupmode="layer"
++     id="layer1"
++     transform="translate(0,-270.54167)">
++    <text
++       xml:space="preserve"
++       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.34722233px;line-height:125%;font-family:Carlito;-inkscape-font-specification:'Carlito, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffa500;stroke-width:0.35;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
++       x="0.43451244"
++       y="287.14099"
++       id="text817"><tspan
++         sodipodi:role="line"
++         id="tspan815"
++         x="0.43451244"
++         y="287.14099"
++         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.34722233px;font-family:Carlito;-inkscape-font-specification:'Carlito, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffa500;stroke-width:0.35;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">Onlyoffice</tspan></text>
++  </g>
++</svg>
+--- /dev/null
++++ linkat-servidor-18.04/web/template.svg
+@@ -0,0 +1,72 @@
++<?xml version="1.0" encoding="UTF-8" standalone="no"?>
++<!-- Created with Inkscape (http://www.inkscape.org/) -->
++
++<svg
++   xmlns:dc="http://purl.org/dc/elements/1.1/"
++   xmlns:cc="http://creativecommons.org/ns#"
++   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
++   xmlns:svg="http://www.w3.org/2000/svg"
++   xmlns="http://www.w3.org/2000/svg"
++   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
++   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
++   width="200"
++   height="100"
++   viewBox="0 0 52.916666 26.458333"
++   version="1.1"
++   id="svg8"
++   inkscape:version="0.92.3 (2405546, 2018-03-11)"
++   sodipodi:docname="template.svg">
++  <defs
++     id="defs2" />
++  <sodipodi:namedview
++     id="base"
++     pagecolor="#ffffff"
++     bordercolor="#666666"
++     borderopacity="1.0"
++     inkscape:pageopacity="0.0"
++     inkscape:pageshadow="2"
++     inkscape:zoom="3.9257124"
++     inkscape:cx="117.03243"
++     inkscape:cy="68.482778"
++     inkscape:document-units="mm"
++     inkscape:current-layer="layer1"
++     showgrid="false"
++     inkscape:measure-start="0,0"
++     inkscape:measure-end="0,0"
++     width="200mm"
++     units="px"
++     inkscape:window-width="1920"
++     inkscape:window-height="992"
++     inkscape:window-x="0"
++     inkscape:window-y="24"
++     inkscape:window-maximized="1" />
++  <metadata
++     id="metadata5">
++    <rdf:RDF>
++      <cc:Work
++         rdf:about="">
++        <dc:format>image/svg+xml</dc:format>
++        <dc:type
++           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
++        <dc:title></dc:title>
++      </cc:Work>
++    </rdf:RDF>
++  </metadata>
++  <g
++     inkscape:label="Capa 1"
++     inkscape:groupmode="layer"
++     id="layer1"
++     transform="translate(0,-270.54167)">
++    <text
++       xml:space="preserve"
++       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:58.62657928px;line-height:125%;font-family:Expressa-Serial;-inkscape-font-specification:'Expressa-Serial, Bold';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffa500;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
++       x="8.6075573"
++       y="293.21622"
++       id="text817"><tspan
++         sodipodi:role="line"
++         id="tspan815"
++         x="8.6075573"
++         y="293.21622"
++         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:26.05625725px;font-family:Expressa-Serial;-inkscape-font-specification:'Expressa-Serial, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffa500;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">JClic</tspan></text>
++  </g>
++</svg>
+--- /dev/null
++++ linkat-servidor-18.04/web/webmin-logo.svg
+@@ -0,0 +1,75 @@
++<?xml version="1.0" encoding="UTF-8" standalone="no"?>
++<!-- Created with Inkscape (http://www.inkscape.org/) -->
++
++<svg
++   xmlns:dc="http://purl.org/dc/elements/1.1/"
++   xmlns:cc="http://creativecommons.org/ns#"
++   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
++   xmlns:svg="http://www.w3.org/2000/svg"
++   xmlns="http://www.w3.org/2000/svg"
++   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
++   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
++   width="200"
++   height="100"
++   viewBox="0 0 52.916666 26.458333"
++   version="1.1"
++   id="svg8"
++   inkscape:version="0.92.3 (2405546, 2018-03-11)"
++   sodipodi:docname="webmin-logo.svg"
++   inkscape:export-filename="/home/suport/Escriptori/web/calibre-logo.png"
++   inkscape:export-xdpi="96"
++   inkscape:export-ydpi="96">
++  <defs
++     id="defs2" />
++  <sodipodi:namedview
++     id="base"
++     pagecolor="#ffffff"
++     bordercolor="#666666"
++     borderopacity="1.0"
++     inkscape:pageopacity="0.0"
++     inkscape:pageshadow="2"
++     inkscape:zoom="4.3319187"
++     inkscape:cx="92.645935"
++     inkscape:cy="84.165787"
++     inkscape:document-units="mm"
++     inkscape:current-layer="layer1"
++     showgrid="false"
++     inkscape:measure-start="0,0"
++     inkscape:measure-end="0,0"
++     width="200mm"
++     units="px"
++     inkscape:window-width="1920"
++     inkscape:window-height="992"
++     inkscape:window-x="0"
++     inkscape:window-y="24"
++     inkscape:window-maximized="1" />
++  <metadata
++     id="metadata5">
++    <rdf:RDF>
++      <cc:Work
++         rdf:about="">
++        <dc:format>image/svg+xml</dc:format>
++        <dc:type
++           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
++        <dc:title />
++      </cc:Work>
++    </rdf:RDF>
++  </metadata>
++  <g
++     inkscape:label="Capa 1"
++     inkscape:groupmode="layer"
++     id="layer1"
++     transform="translate(0,-270.54167)">
++    <text
++       xml:space="preserve"
++       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.34722233px;line-height:125%;font-family:Carlito;-inkscape-font-specification:'Carlito, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffa500;stroke-width:0.35;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
++       x="5.0888362"
++       y="288.0574"
++       id="text817"><tspan
++         sodipodi:role="line"
++         id="tspan815"
++         x="5.0888362"
++         y="288.0574"
++         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.34722233px;font-family:Carlito;-inkscape-font-specification:'Carlito, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffa500;stroke-width:0.35;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">Webmin</tspan></text>
++  </g>
++</svg>
