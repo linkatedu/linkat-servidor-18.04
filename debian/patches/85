@@ -1,0 +1,185 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-85) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2019-04-12
+
+--- /dev/null
++++ linkat-servidor-18.04/1
+@@ -0,0 +1,5 @@
++linkat-servidor (18.04-85) bionic; urgency=medium
++
++  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
++
++ -- Pablo Vigo <pvigo@xtec.cat>  Tue, 10 Jul 2018 15:43:32 +0200
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/permisos/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/permisos/tasks/main.yml
+@@ -137,13 +137,13 @@
+         group: Professorat
+         mode: 02770
+ 
+-#- name: Verificant unitat Paperera cloudprint
+-#  file:
+-#        path: /srv/exports/Paperera/Paperera_Unitat_cloudprint
+-#        state: directory
+-#        owner: root
+-#        group: Cloudprint
+-#        mode: 02770
++- name: Verificant unitat Paperera cloudprint
++  file:
++        path: /srv/exports/Paperera/Paperera_Unitat_cloudprint
++        state: directory
++        owner: root
++        group: Cloudprint
++        mode: 02770
+ 
+ #- name: Verificant unitats Paperera maquetes
+ #  file:
+@@ -159,4 +159,4 @@
+         state: directory
+         owner: lnadmin
+         group: root
+-        mode: 00775
++        mode: 00770
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/web/tasks/main.yml
+@@ -0,0 +1,18 @@
++---
++- name: Copiant fitxers accés web 
++  copy: src=files/index.html dest=/srv/app/servidorweb/
++
++- file:
++        path: /srv/app/servidorweb/index.html
++        owner: root
++        group: root
++        mode: 0644
++
++- name: Copiant Nextcloud script restart
++  copy: src=files/nextcloud-restart.sh dest=/usr/local/bin/
++
++- file:
++        path: /usr/local/bin/nextcloud-restart.sh
++        owner: lnadmin
++        group: root
++        mode: 0774
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/server.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/server.yml
+@@ -14,4 +14,4 @@
+     - clamav
+     - docker
+     - jclic
+-    - nginx
++    - web
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/cloudprint.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/cloudprint.conf
+@@ -12,9 +12,9 @@
+    force group = Cloudprint
+    valid users = @Cloudprint
+    create mask = 664
+-#   vfs objects = recycle
+-#   recycle:repository = /srv/exports/Paperera/Paperera_Unitat_cloudprint
+-#   recycle:exclude = *.tmp *.temp *.o
+-#   recycle:versions = Yes
+-#   recycle:keeptree = Yes
+-#   recycle:touch = true
++   vfs objects = recycle
++   recycle:repository = /srv/exports/Paperera/Paperera_Unitat_cloudprint
++   recycle:exclude = *.tmp *.temp *.o
++   recycle:versions = Yes
++   recycle:keeptree = Yes
++   recycle:touch = true
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/index.html
++++ linkat-servidor-18.04/linkat-servidor/plantilles/index.html
+@@ -236,8 +236,9 @@ h1 {
+           </div>
+         <div class="card-body">
+           <h4 class="card-title">Arxiu digital</h4>
+-          <a href="http://__IP__:8081" class="btn btn-primary">Accés</a>
+-        </div>
++          <a href="http://__IP__:8081" class="btn btn-primary">Accés web</a>
++	  <a href="http://__IP__:8081/mobile" class="btn btn-primary">Accés mòbil</a>
++	</div>
+       </div>
+   </div>
+   <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4 cat1">
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/maquetes.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/maquetes.conf
+@@ -12,10 +12,10 @@
+    force group = Administradors 
+    valid users = @Administradors
+    create mask = 664
+-   vfs objects = recycle
+-   recycle:repository = /srv/exports/Paperera/Paperera_Unitat_maquetes
+-   recycle:exclude = *.tmp *.temp *.o
+-   recycle:versions = Yes
+-   recycle:keeptree = Yes
+-   recycle:touch = true
++#   vfs objects = recycle
++#   recycle:repository = /srv/exports/Paperera/Paperera_Unitat_maquetes
++#   recycle:exclude = *.tmp *.temp *.o
++#   recycle:versions = Yes
++#   recycle:keeptree = Yes
++#   recycle:touch = true
+ 
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/nextcloud-restart.sh
+@@ -0,0 +1,40 @@
++#!/bin/bash
++
++## Nextcloud
++
++sudo nextcloud.enable-https self-signed
++sudo snap set nextcloud ports.http=81
++sudo snap set nextcloud ports.https=10443
++sudo nextcloud.occ config:system:set trusted_domains 1 --value="__IP__"
++sudo nextcloud.occ config:system:set trusted_domains 2 --value="__NAME__.__DOMAIN__"
++sudo snap run nextcloud.occ app:install user_ldap
++sudo snap run nextcloud.occ app:enable user_ldap
++sudo nextcloud.occ config:app:set user_ldap ldapAgentName --value="dc=__DOMAIN__"
++sudo nextcloud.occ config:app:set user_ldap ldapBase --value="dc=__DOMAIN__"
++#sudo nextcloud.occ config:app:set user_ldap ldap_agent_password --value="__PASSROOT__"
++sudo nextcloud.occ config:app:set user_ldap ldap_base --value="dc=__DOMAIN__"
++sudo nextcloud.occ config:app:set user_ldap ldap_base_groups --value="dc=__DOMAIN__"
++sudo nextcloud.occ config:app:set user_ldap ldap_base_users --value="dc=__DOMAIN__"
++sudo nextcloud.occ config:app:set user_ldap ldap_configuration_active --value="1"
++sudo nextcloud.occ config:app:set user_ldap ldap_display_name --value="cn"
++#sudo nextcloud.occ config:app:set user_ldap ldap_dn --value="cn=admin,dc=__DOMAIN__"
++sudo nextcloud.occ config:app:set user_ldap ldap_group_filter --value="(&(|(objectclass=posixGroup)))"
++sudo nextcloud.occ config:app:set user_ldap ldap_group_member_assoc_attribute --value="gidNumber"
++sudo nextcloud.occ config:app:set user_ldap ldap_groupfilter_objectclass --value="posixGroup"
++sudo nextcloud.occ config:app:set user_ldap ldap_host --value="localhost"
++sudo nextcloud.occ config:app:set user_ldap ldap_login_filter --value="(&(|(objectclass=inetOrgPerson)(objectclass=organizationalPerson)(objectclass=person))(|(cn=%uid)(gidNumber=%uid)(homeDirectory=%uid)(loginShell=%uid)))"
++sudo nextcloud.occ config:app:set user_ldap ldap_loginfilter_attributes --value="cn\ngidNumber\nhomeDirectory\nloginShell"
++sudo nextcloud.occ config:app:set user_ldap ldap_port --value="389"
++sudo nextcloud.occ config:app:set user_ldap ldap_tls --value="0"
++sudo nextcloud.occ config:app:set user_ldap ldap_userfilter_objectclass --value="inetOrgPerson\norganizationalPerson\nperson"
++sudo nextcloud.occ config:app:set user_ldap ldap_userlist_filter --value="(|(objectclass=inetOrgPerson)(objectclass=organizationalPerson)(objectclass=person))"
++sudo nextcloud.occ config:app:set user_ldap types --value="authentication"
++#sudo snap restart nextcloud
++sudo nextcloud.occ app:install onlyoffice
++sudo nextcloud.occ app:enable onlyoffice
++sudo nextcloud.occ config:app:set onlyoffice DocumentServerUrl --value="https://__IP__:10445/"
++#sudo nextcloud.occ config:app:set --value https:\/\/__IP__:10445\/ onlyoffice DocumentServerUrl
++sudo nextcloud.occ config:system:set onlyoffice verify_peer_off --value="true"
++# Resolve onlyoffice connection error
++sudo nextcloud.occ config:app:delete onlyoffice settings_error
++sudo snap restart nextcloud
