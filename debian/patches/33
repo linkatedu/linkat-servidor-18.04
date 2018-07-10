@@ -1,0 +1,91 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-33) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-10-09
+
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -211,7 +211,7 @@ killall update-manager update-notifier 2
+ ## Eliminar Network-Manager
+ dpkg -s network-manager-gnome > /dev/null 2>&1
+ if [ "$?" -eq 0 ]; then
+-	sudo apt purge network-manager-gnome network-manager
++	sudo apt purge network-manager-gnome network-manager -y
+ fi
+ 
+ ## Aplica nova configuració de xarxa
+@@ -267,12 +267,11 @@ ansible-playbook "$ANSIBLEPLAY"/acl.yml
+ sudo "$FILES_LINKAT"/nextcloud.sh
+ 
+ ## Onlyoffice
+-#if [ -f /etc/nginx/conf.d/onlyoffice-documentserver.conf ]; then
+-#	sudo chattr -i /etc/nginx/conf.d/onlyoffice-documentserver.conf
+-#fi
+-#"$FILES_LINKAT"/onlyoffice.sh
+-#ansible-playbook "$ANSIBLEPLAY"/onlyoffice.yml
+-#chattr +i /etc/nginx/conf.d/onlyoffice-documentserver.conf
++if [ -f /etc/modalitat_linkat ]; then
++	sudo docker stop $(docker ps -a -q)
++	sudo docker rm $(docker ps -a -q)
++fi
++sudo "$FILES_LINKAT"/onlyoffice.sh
+ 
+ # Flag d'instal·lació
+ echo servidor > /etc/modalitat_linkat
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/onlyoffice.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/onlyoffice.sh
+@@ -1,20 +1,20 @@
+ #!/bin/bash
+ 
+-# Create onlyoffice database
+-sudo -i -u postgres psql -c "CREATE DATABASE onlyoffice;"
+-sudo -i -u postgres psql -c "CREATE USER onlyoffice WITH password '__PASSLNADMIN__';"
+-sudo -i -u postgres psql -c "GRANT ALL privileges ON DATABASE onlyoffice TO onlyoffice;"
++sudo mkdir -p /srv/app/onlyoffice/DocumentServer/data/certs
+ 
+-sudo mkdir -p /srv/app/onlyoffice/DocumentServer/data/certs/
++sudo openssl req -x509 -nodes -days 36500 -newkey rsa:2048 -keyout /srv/app/onlyoffice/DocumentServer/data/certs/onlyoffice.key -out /srv/app/onlyoffice/DocumentServer/data/certs/onlyoffice.crt -subj "/C=ES/ST=Catalunya/L=Barcelona/O=Generalitat de Catalunya/OU=Departament Ensenyament/CN=xtec.cat"
+ 
+-openssl req -x509 -nodes -days 36500 -newkey rsa:2048 -keyout /etc/ssl/onlyoffice/onlyoffice.key -out /etc/ssl/onlyoffice/onlyoffice.crt -subj "/C=ES/ST=Catalunya/L=Barcelona/O=Generalitat de Catalunya/OU=Departament Ensenyament/CN=xtec.cat"
++sudo docker pull onlyoffice/documentserver
+ 
+-docker pull onlyoffice/documentserver
++sudo docker run -itd -p 0.0.0.0:8443:443 --restart=always \
++    -v /srv/app/onlyoffice/DocumentServer/cache:/var/lib/onlyoffice/documentserver/App_Data/cache/files  \
++    -v /srv/app/onlyoffice/DocumentServer/logs:/var/log/onlyoffice  \
++#    -v /srv/app/onlyoffice/DocumentServer/config:/etc/onlyoffice/documentserver
++    -v /srv/app/onlyoffice/DocumentServer/data:/var/www/onlyoffice/Data onlyoffice/documentserver
++
++sudo nextcloud.occ app:install onlyoffice
++sudo nextcloud.occ app:enable onlyoffice
++sudo nextcloud.occ config:app:set onlyoffice DocumentServerUrl --value="https://__IP__:8443/"
++sudo nextcloud.occ config:system:set onlyoffice verify_peer_off --value="true"
++sudo snap restart nextcloud
+ 
+-sudo docker run -i -t -d -p 10445:443 --restart=always -v /srv/app/onlyoffice/DocumentServer/data:/var/www/onlyoffice/Data onlyoffice/documentserver
+-
+-#sudo nextcloud.occ app:install onlyoffice
+-#sudo nextcloud.occ app:enable onlyoffice
+-#sudo nextcloud.occ config:app:set onlyoffice DocumentServerUrl --value="https://__IP__:10445/"
+-###sudo nextcloud.occ config:app:set --value https:\/\/__IP__:10445\/ onlyoffice DocumentServerUrl
+-#sudo nextcloud.occ config:system:set onlyoffice verify_peer_off --value="true"
