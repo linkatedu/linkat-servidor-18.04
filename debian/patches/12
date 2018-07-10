@@ -1,0 +1,52 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-12) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-08-20
+
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -203,12 +203,12 @@ ansible-playbook "$ANSIBLEPLAY"/dns.yml
+ 
+ systemctl restart bind9.service
+ 
+-ansible-playbook "$ANSIBLEPLAY"/ldap.yml
+-ansible-playbook "$ANSIBLEPLAY"/server.yml
+-
+ ## Revisa connexió
+ check_connexio
+ 
++ansible-playbook "$ANSIBLEPLAY"/ldap.yml
++ansible-playbook "$ANSIBLEPLAY"/server.yml
++
+ ## Configurant servidor LDAP
+ cd "$FILES_LINKAT"/
+ sudo "$FILES_LINKAT"/ldap.sh
+@@ -230,7 +230,7 @@ ansible-playbook "$ANSIBLEPLAY"/acl.yml
+ #ansible-playbook "$ANSIBLEPLAY"/onlyoffice.yml
+ #chattr +i /etc/nginx/conf.d/onlyoffice-documentserver.conf
+ 
+-yad --width=300 --title="Linkat Servidor de centre" --text="\nEl Servidor de centre s'ha de reiniciar per aplicar els canvis" \
++yad --width=300 --title="Linkat Servidor de centre" --text="\nLa configuració s'ha aplicat.\n\nEl Servidor de centre s'ha de reiniciar per aplicar els canvis.\n\nVoleu reiniciar ara?" \
+ --image="/usr/share/linkat/linkat-servidor/linkat-servidor-banner.png" \
+ --button="D'acord" --button="Cancel·la":11
+ if [ $? -eq 0 ]; then
