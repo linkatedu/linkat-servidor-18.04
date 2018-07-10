@@ -1,0 +1,68 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-55) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-12-20
+
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/jclic/tasks/main.yml
+@@ -0,0 +1,9 @@
++---
++- name: Copiant fitxers de configuració Jclic 
++  copy: src=files/jclic.cfg dest=/usr/share/java/JClic/
++
++- file:
++        path: /usr/share/java/JClic/jclic.cfg
++        owner: root
++        group: root
++        mode: 0644
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/server.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/server.yml
+@@ -13,3 +13,4 @@
+     - webmin
+     - clamav
+     - fog
++    - jclic
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -260,8 +260,8 @@ ansible-playbook "$ANSIBLEPLAY"/acl.yml
+ ## Nextcloud
+ sudo "$FILES_LINKAT"/nextcloud.sh
+ 
+-## Onlyoffice
+-#sudo "$FILES_LINKAT"/onlyoffice.sh
++## Copy Jclic Projects
++mv /usr/share/java/JClic/projects /srv/exports/S/jclic
+ 
+ ## Desctivar NetworkManager
+ sudo systemctl stop NetworkManager.service
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/jclic.cfg
++++ linkat-servidor-18.04/linkat-servidor/plantilles/jclic.cfg
+@@ -7,7 +7,7 @@
+  <paths>
+   <path id="root" path="/srv/exports/S/jclic/projects" />
+  </paths>
+- <reporter enabled="false" class="TCPReporter" params="path=__NAME__.__DOMAIN__:8080/reports" />
++ <reporter enabled="false" class="TCPReporter" params="path=__IP__:8080/reports" />
+  <sound enabled="true" system="true" mediaSystem="default" />
+  <lookAndFeel id="system" />
+  <browser id="" />
