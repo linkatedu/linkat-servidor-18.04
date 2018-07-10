@@ -1,0 +1,172 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-14) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-08-21
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/acl/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/acl/tasks/main.yml
+@@ -3,6 +3,36 @@
+   acl:
+         path: /srv/exports/P
+         state: present
++        entry: "default:user::rwx"
++
++- name: Verificant ACL unitats S
++  acl:
++        path: /srv/exports/S
++        state: present
++        entry: "default:user::rwx"
++
++- name: Verificant ACL unitats T
++  acl:
++        path: /srv/exports/T
++        state: present
++        entry: "default:user::rwx"
++
++- name: Verificant ACL unitats M
++  acl:
++        path: /srv/exports/M
++        state: present
++        entry: "default:user::rwx"
++
++- name: Verificanti ACL unitats G
++  acl:
++        path: /srv/exports/G
++        state: present
++        entry: "default:user::rwx"
++
++- name: Verificant ACL unitat P
++  acl:
++        path: /srv/exports/P
++        state: present
+         entry: "default:group::rwx"
+         
+ - name: Verificant ACL unitats S
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/permisos/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/permisos/tasks/main.yml
+@@ -5,7 +5,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 0555
++        mode: 00555
+ 
+ - name: Verificant unitat P
+   file:
+@@ -13,7 +13,7 @@
+         state: directory
+         owner: root
+         group: Professorat 
+-        mode: 6770
++        mode: 06770
+         recurse: yes
+ 
+ - name: Verificant unitats S
+@@ -22,7 +22,7 @@
+         state: directory
+         owner: root
+         group: Administradors
+-        mode: 6775
++        mode: 06775
+         recurse: yes
+ 
+ - name: Verificant unitats T
+@@ -31,7 +31,7 @@
+         state: directory
+         owner: nobody
+         group: Administradors
+-        mode: 0777
++        mode: 00777
+         recurse: yes
+ 
+ - name: Verificant unitats M
+@@ -40,7 +40,7 @@
+         state: directory
+         owner: root
+         group: Professorat
+-        mode: 6770 
++        mode: 06770 
+         recurse: yes
+ 
+ - name: Verificant unitats G
+@@ -49,7 +49,7 @@
+         state: directory
+         owner: root
+         group: Gestio
+-        mode: 6770
++        mode: 06770
+         recurse: yes
+ 
+ - name: Verificant Paperera
+@@ -58,7 +58,7 @@
+         state: directory
+         owner: root
+         group: Administradors
+-        mode: 6775
++        mode: 06775
+ 
+ - name: Verificant Paperera P
+   file:
+@@ -66,7 +66,7 @@
+         state: directory
+         owner: root
+         group: Professorat
+-        mode: 0770
++        mode: 00770
+         recurse: yes
+ 
+ - name: Verificant Paperera S
+@@ -75,7 +75,7 @@
+         state: directory
+         owner: root
+         group: Administradors
+-        mode: 0644
++        mode: 00644
+         recurse: yes
+ 
+ - name: Verificant Paperera T
+@@ -84,7 +84,7 @@
+         state: directory
+         owner: nobody
+         group: Administradors
+-        mode: 0775
++        mode: 00775
+         recurse: yes
+ 
+ - name: Verificant Paperera M
+@@ -93,7 +93,7 @@
+         state: directory
+         owner: root
+         group: Professorat
+-        mode: 0770
++        mode: 00770
+         recurse: yes
+ 
+ - name: Verificant Paperera G
+@@ -102,5 +102,5 @@
+         state: directory
+         owner: root
+         group: Gestio
+-        mode: 0770
++        mode: 00770
+         recurse: yes
