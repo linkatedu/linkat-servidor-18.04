@@ -1,0 +1,72 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-111) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Francesc Konate <linkat@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2019-08-16
+
+--- linkat-servidor-18.04.orig/linkat-servidor/patches/01-nextcloud.sh
++++ linkat-servidor-18.04/linkat-servidor/patches/01-nextcloud.sh
+@@ -15,6 +15,6 @@ cp $NC_TEMPLATE $NC_RESTART
+                         sed -i "s/__NAME__/$NEW_NAME/g" /usr/local/bin/nextcloud-restart.sh
+                         sed -i "s/__DOMAIN__/$NEW_DOMAIN/g" /usr/local/bin/nextcloud-restart.sh
+                         sed -i "s/__IP__/$NEW_IP/g" /usr/local/bin/nextcloud-restart.sh
+-                fi
++        fi
+ # Assignem permisos a nextcloud-restart
+ chmod 570 $NC_RESTART
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/patches/02-smb.sh
+@@ -0,0 +1,6 @@
++#!/bin/bash
++
++grep --quiet "ntlm" smb.conf
++if [ $? != 0 ]; then
++	sed -i '/security.*/a \\tntlm auth = yes' smb.conf
++fi
+--- linkat-servidor-18.04.orig/linkat-servidor/patches/patches.sh
++++ linkat-servidor-18.04/linkat-servidor/patches/patches.sh
+@@ -3,3 +3,4 @@
+ cd /usr/share/linkat/linkat-servidor/patches/
+ 
+ ./01-nextcloud.sh
++./02-smb.sh
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/smb.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/smb.conf
+@@ -1,17 +1,15 @@
+ [global]
+         workgroup = __DOMAIN__ 
+         netbios name = __NAME__
+-
+         deadtime = 10
+-
+         log level = 1
+         log file = /var/log/samba/log.%m
+         max log size = 5000
+         debug pid = yes
+         debug uid = yes
+         utmp = no 
+-
+         security = user
++	ntlm auth = yes
+ #       domain logons = yes
+ #       os level = 64
+ #       logon path =
