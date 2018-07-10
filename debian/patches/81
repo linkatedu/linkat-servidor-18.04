@@ -1,0 +1,90 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-81) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2019-04-01
+
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -253,6 +253,10 @@ check_errors ldap-samba
+ sudo "$FILES_LINKAT"/smbldap-populate.sh 
+ check_errors populate
+ 
++## Copy Jclic Projects
++mv /usr/share/java/JClic/projects /srv/exports/S/jclic
++chown -R root:Administradors /srv/exports/S/jclic
++
+ ## Aplicant Playbook permisos i ACLs unitats
+ ansible-playbook "$ANSIBLEPLAY"/permisos.yml
+ ansible-playbook "$ANSIBLEPLAY"/acl.yml
+@@ -260,9 +264,6 @@ ansible-playbook "$ANSIBLEPLAY"/acl.yml
+ ## Nextcloud
+ sudo "$FILES_LINKAT"/nextcloud.sh
+ 
+-## Copy Jclic Projects
+-mv /usr/share/java/JClic/projects /srv/exports/S/jclic
+-
+ ## Desctivar NetworkManager
+ sudo systemctl stop NetworkManager.service
+ sudo systemctl disable NetworkManager.service
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/erase_trash
++++ linkat-servidor-18.04/linkat-servidor/plantilles/erase_trash
+@@ -1,8 +1,8 @@
+ #!/bin/bash
+ # Eliminem paperera
+ for PAPER in $(ls /srv/exports/Paperera); do 
+-	/usr/bin/find /srv/exports/Paperera/$PAPER/* -mtime +14 -exec rm -fr {} \; > /dev/null 2>&1
++	/usr/bin/find /srv/exports/Paperera/$PAPER/* -mtime +7 -exec rm -fr {} \; > /dev/null 2>&1
+ done
+ 
+ # Eliminem arxius infectats
+-/usr/bin/find /var/quarantine -mtime +14 -exec rm {} \; 2>&1
++/usr/bin/find /var/quarantine -mtime +7 -exec rm {} \; 2>&1
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/nextcloud.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/nextcloud.sh
+@@ -35,11 +35,25 @@ sudo nextcloud.occ config:app:set user_l
+ sudo nextcloud.occ config:app:set user_ldap ldap_userfilter_objectclass --value="inetOrgPerson\norganizationalPerson\nperson"
+ sudo nextcloud.occ config:app:set user_ldap ldap_userlist_filter --value="(|(objectclass=inetOrgPerson)(objectclass=organizationalPerson)(objectclass=person))"
+ sudo nextcloud.occ config:app:set user_ldap types --value="authentication"
+-sudo snap restart nextcloud
++#sudo snap restart nextcloud
+ sudo nextcloud.occ app:install onlyoffice
+ sudo nextcloud.occ app:enable onlyoffice
+ sudo nextcloud.occ config:app:set onlyoffice DocumentServerUrl --value="https://__IP__:10445/"
++sudo nextcloud.occ config:app:set onlyoffice editFormats --value="{\"csv\":\"false\",\"doc\":\"false\",\"docm\":\"false\",\"docx\":\"true\",\"dotx\":\"false\",\"epub\":\"false\",\"html\":\"false\",\"odp\":\"false\",\"ods\":\"true\",\"odt\":\"true\",\"pdf\":\"false\",\"potm\":\"false\",\"potx\":\"false\",\"ppsm\":\"false\",\"ppsx\":\"false\",\"ppt\":\"false\",\"pptm\":\"false\",\"pptx\":\"true\",\"rtf\":\"false\",\"txt\":\"false\",\"xls\":\"false\",\"xlsm\":\"false\",\"xlsx\":\"true\",\"xltm\":\"false\",\"xltx\":\"false\"}"
++sudo nextcloud.occ config:app:set onlyoffice defFormats --value="{\"csv\":\"false\",\"doc\":\"true\",\"docm\":\"false\",\"docx\":\"true\",\"dotx\":\"false\",\"epub\":\"false\",\"html\":\"false\",\"odp\":\"true\",\"ods\":\"true\",\"odt\":\"true\",\"pdf\":\"true\",\"potm\":\"false\",\"potx\":\"false\",\"ppsm\":\"false\",\"ppsx\":\"false\",\"ppt\":\"true\",\"pptm\":\"false\",\"pptx\":\"true\",\"rtf\":\"false\",\"txt\":\"false\",\"xls\":\"true\",\"xlsm\":\"false\",\"xlsx\":\"true\",\"xltm\":\"false\",\"xltx\":\"false\"}"
+ #sudo nextcloud.occ config:app:set --value https:\/\/__IP__:10445\/ onlyoffice DocumentServerUrl
+ sudo nextcloud.occ config:system:set onlyoffice verify_peer_off --value="true"
++# Resolve onlyoffice connection error
++sudo nextcloud.occ config:app:delete onlyoffice settings_error
++# Change default nextcloud storage folder
++if [ ! -f /etc/modalitat_linkat ]; then
++	sudo nap disable nextcloud
++	sudo mkdir -p /srv/app/nextcloud 
++	sudo mv /var/snap/nextcloud/common/nextcloud/data/ /srv/app/nextcloud/
++	sudo mkdir /var/snap/nextcloud/common/nextcloud/data/
++	sudo mount --bind /srv/app/nextcloud/data/ /var/snap/nextcloud/common/nextcloud/data/
++	sudo snap enable nextcloud
++fi
++
+ sudo snap restart nextcloud
+ 
