@@ -1,0 +1,493 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-21) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-08-24
+
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/configurador/clamav.yml
+@@ -0,0 +1,9 @@
++---
++- name: Servidor de centre
++  hosts: servidor
++  remote_user: anuser
++  become: yes
++  become_method: sudo
++
++  roles:
++    - clamav
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/acl/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/acl/tasks/main.yml
+@@ -80,12 +80,12 @@
+         entry: "default:group::rwx"
+         recursive: yes
+ 
+-- name: Verificant ACL Paperera S
+-  acl:
+-        path: /srv/exports/Paperera/Paperera_Unitat_S
+-        state: present
+-        entry: "default:group::rwx"
+-        recursive: yes
++#- name: Verificant ACL Paperera S
++#  acl:
++#        path: /srv/exports/Paperera/Paperera_Unitat_S
++#        state: present
++#        entry: "default:group::rwx"
++#        recursive: yes
+ 
+ - name: Verificant ACL Paperera T
+   acl:
+@@ -122,6 +122,13 @@
+         entry: "user:lnadmin:rwx"
+         recursive: yes
+ 
++- name: Verificant ACL lnadmin unitats T
++  acl:
++        path: /srv/exports/T
++        state: present
++        entry: "default:user:lnadmin:rwx"
++        recursive: yes
++
+ - name: Verificant ACL lnadmin unitats S
+   acl:
+         path: /srv/exports/S
+@@ -150,6 +157,13 @@
+         entry: "default:user:lnadmin:rwx"
+         recursive: yes
+ 
++- name: Verificant ACL lnadmin unitats T
++  acl:
++        path: /srv/exports/T
++        state: present
++        entry: "user:lnadmin:rwx"
++        recursive: yes
++
+ - name: Verificant ACL lnadmin unitats S
+   acl:
+         path: /srv/exports/S
+@@ -178,6 +192,13 @@
+         entry: "user:lnadmin:rwx"
+         recursive: yes
+ 
++- name: Verificant ACL clamav unitats T
++  acl:
++        path: /srv/exports/T
++        state: present
++        entry: "default:user:clamav:rwx"
++        recursive: yes
++
+ - name: Verificant ACL clamav unitats S
+   acl:
+         path: /srv/exports/S
+@@ -205,6 +226,14 @@
+         state: present
+         entry: "default:user:clamav:rwx"
+         recursive: yes
++
++- name: Verificant ACL clamav unitats T
++  acl:
++        path: /srv/exports/T
++        state: present
++        entry: "user:clamav:rwx"
++        recursive: yes
++
+ - name: Verificant ACL clamav unitats S
+   acl:
+         path: /srv/exports/S
+@@ -289,13 +318,6 @@
+         recursive: yes
+         state: present
+ 
+-- name: Verificant ACL Gestio Paperera G
+-  acl:
+-        path: /srv/exports/Paperera/Paperera_Unitat_G
+-        entry: "g:Gestio:rwx"
+-        recursive: yes
+-        state: present
+-
+ - name: Verificant ACL lnadmin Paperera T
+   acl:
+         path: /srv/exports/Paperera/Paperera_Unitat_T
+@@ -356,13 +378,26 @@
+   acl:
+         path: /srv/exports/M
+         state: present
+-        entry: "user:minidlna:rwx"
++        entry: "user:minidlna:r-x"
+         recursive: yes
+ 
+ - name: Verificant ACL minidlna unitats M
+   acl:
+         path: /srv/exports/M
+         state: present
+-        entry: "default:user:minidlna:rwx"
++        entry: "default:user:minidlna:r-x"
+         recursive: yes
+ 
++- name: Verificant ACL minidlna Paperera M
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_M
++        state: present
++        entry: "user:minidlna:r-x"
++        recursive: yes
++
++- name: Verificant ACL minidlna Paperera M
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_M
++        state: present
++        entry: "default:user:minidlna:r-x"
++        recursive: yes
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/clamav/tasks/main.yml
+@@ -0,0 +1,6 @@
++---
++- name: Copiant configuració de ClamAV
++  copy: src=files/linkat-clamdscan dest=/etc/cron.daily/
++
++- name: Copiant configuració de ClamAV
++  copy: src=files/erase_trash dest=/etc/cron.weekly/
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/permisos/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/permisos/tasks/main.yml
+@@ -66,17 +66,17 @@
+         state: directory
+         owner: root
+         group: Professorat
+-        mode: 00770
++        mode: 06770
+         recurse: yes
+ 
+-- name: Verificant Paperera S
+-  file:
+-        path: /srv/exports/Paperera/Paperera_Unitat_S
+-        state: directory
+-        owner: root
+-        group: Administradors
+-        mode: 00644
+-        recurse: yes
++#- name: Verificant Paperera S
++#  file:
++#        path: /srv/exports/Paperera/Paperera_Unitat_S
++#        state: directory
++#        owner: root
++#        group: Administradors
++#        mode: 00644
++#        recurse: yes
+ 
+ - name: Verificant Paperera T
+   file:
+@@ -84,7 +84,7 @@
+         state: directory
+         owner: nobody
+         group: Administradors
+-        mode: 00775
++        mode: 00777
+         recurse: yes
+ 
+ - name: Verificant Paperera M
+@@ -93,7 +93,7 @@
+         state: directory
+         owner: root
+         group: Professorat
+-        mode: 00770
++        mode: 06770
+         recurse: yes
+ 
+ - name: Verificant Paperera G
+@@ -102,5 +102,5 @@
+         state: directory
+         owner: root
+         group: Gestio
+-        mode: 00770
++        mode: 06770
+         recurse: yes
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/smb/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/smb/tasks/main.yml
+@@ -1,25 +1,28 @@
+ ---
+-- name: Copiant fitxers de configuració SAMBA 
++- name: Copiant fitxers de configuració SAMBA smb
+   copy: src=files/smb.conf dest=/etc/samba/smb.conf
+ 
+-- name: Copiant fitxers de configuració SAMBA
++- name: Copiant fitxers de configuració SAMBA professorat
+   copy: src=files/professorat.conf dest=/etc/samba/smb.conf.d/
+ 
+-- name: Copiant fitxers de configuració SAMBA
++- name: Copiant fitxers de configuració SAMBA programari
+   copy: src=files/programari.conf dest=/etc/samba/smb.conf.d/
+ 
+-- name: Copiant fitxers de configuració SAMBA
++- name: Copiant fitxers de configuració SAMBA treball
+   copy: src=files/treball.conf dest=/etc/samba/smb.conf.d/
+ 
+-- name: Copiant fitxers de configuració SAMBA
++- name: Copiant fitxers de configuració SAMBA multimèdia
+   copy: src=files/multimedia.conf dest=/etc/samba/smb.conf.d/
+ 
+-- name: Copiant fitxers de configuració SAMBA
++- name: Copiant fitxers de configuració SAMBA gestió
+   copy: src=files/gestio.conf dest=/etc/samba/smb.conf.d/
+ 
+-- name: Copiant fitxers de configuració SAMBA
++- name: Copiant fitxers de configuració SAMBA smb-ldap
+   copy: src=files/smb-ldap.conf dest=/etc/samba/smb.conf.d/
+ 
++- name: Copiant fitxers de configuració SAMBA paperera
++  copy: src=files/paperera_xarxa.conf dest=/etc/samba/smb.conf.d/
++  
+ - file:
+         path: /etc/samba/smb.conf
+         owner: root
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/unitats/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/unitats/tasks/main.yml
+@@ -63,13 +63,13 @@
+         group: root
+         mode: 0770
+ 
+-- name: Verificant Paperera S
+-  file:
+-        path: /srv/exports/Paperera/Paperera_Unitat_S
+-        state: directory
+-        owner: root
+-        group: root
+-        mode: 0644
++#- name: Verificant Paperera S
++#  file:
++#        path: /srv/exports/Paperera/Paperera_Unitat_S
++#        state: directory
++#        owner: root
++#        group: root
++#        mode: 0644
+ 
+ - name: Verificant Paperera T
+   file:
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/server.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/server.yml
+@@ -11,5 +11,5 @@
+     - smb
+     - dlna
+     - webmin
+-#    - clam_antivirus
++    - clamav
+ #    - jclic
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -213,6 +213,7 @@ ansible-playbook "$ANSIBLEPLAY"/server.y
+ cd "$FILES_LINKAT"/
+ sudo "$FILES_LINKAT"/ldap.sh
+ sudo "$FILES_LINKAT"/smbldap-populate.sh
++sudo smbpasswd -w "$NEW_PASSROOT1"
+ 
+ ## Aplicant Playbook permisos i ACLs unitats
+ ansible-playbook "$ANSIBLEPLAY"/permisos.yml
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/config
++++ linkat-servidor-18.04/linkat-servidor/plantilles/config
+@@ -19,7 +19,7 @@ md5pass=1
+ theme=authentic-theme
+ product=webmin
+ webprefix=
+-lang_lnadmin=ca
++lang_lnadmin=ca.UTF-8
+ realname_lnadmin=lnadmin
+-lang_root=ca
++lang_root=ca.UTF-8
+ acceptlang=0
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/erase_trash
+@@ -0,0 +1,12 @@
++#!/bin/bash
++# Eliminem paperera
++/usr/bin/find /srv/exports/Paperera/Paperera_Unitat_T/* -mtime +7 -exec rm -fr {} \; > /dev/null 2>&1
++
++/usr/bin/find /srv/exports/Paperera/Paperera_Unitat_M/* -mtime +7 -exec rm -fr {} \; > /dev/null 2>&1
++
++/usr/bin/find /srv/exports/Paperera/Paperera_Unitat_P/* -mtime +7 -exec rm -fr {} \; > /dev/null 2>&1
++
++/usr/bin/find /srv/exports/Paperera/Paperera_Unitat_G/* -mtime +7 -exec rm -fr {} \; > /dev/null 2>&1
++
++# Eliminem arxius infectats
++/usr/bin/find /var/quarantine -mtime +7 -exec rm {} \; 2>&1
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/for.domini
++++ linkat-servidor-18.04/linkat-servidor/plantilles/for.domini
+@@ -1,6 +1,6 @@
+ $TTL 86400
+-@   IN  SOA     __NAME__.__DOMAIN__. root.__DOMAIN__. (
+-        2011071001  ;Serial
++@   IN  SOA     __DOMAIN__. root.__DOMAIN__. (
++        2018090101  ;Serial
+         3600        ;Refresh
+         1800        ;Retry
+         604800      ;Expire
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/linkat-clamdscan
+@@ -0,0 +1,25 @@
++#!/bin/bash
++#Scan for viruses in /srv/exports
++
++CONTROL="/srv/exports/.clamdscan.control"
++LOG="/var/log/virus_exports.log"
++
++echo "################################" >> $LOG 
++echo "###### Starting clamdscan ######" >> $LOG
++echo "################################" >> $LOG
++
++date >> $LOG
++
++if [ -f $CONTROL ] ; then
++	/usr/bin/nice -n 19 /usr/bin/ionice -c2 -n7 find /srv/exports -type f -cnewer $CONTROL -print0 | xargs -0 -r clamdscan --multiscan --fdpass --infected --log=$LOG --move=/var/quarantine --quiet
++	touch $CONTROL
++else
++	/usr/bin/nice -n 19 /usr/bin/ionice -c2 -n7 find  /srv/exports -type f -print0 | xargs -0 -r clamdscan --multiscan --fdpass --infected --log=$LOG --move=/var/quarantine --quiet
++	touch $CONTROL
++fi
++
++date >> $LOG
++echo "################################" >> $LOG
++echo "###### Finished clamdscan ######" >> $LOG
++echo "################################" >> $LOG
++echo " " >> $LOG
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/named.conf.options
++++ linkat-servidor-18.04/linkat-servidor/plantilles/named.conf.options
+@@ -14,13 +14,15 @@ options {
+          __DNS1__;
+ 	 __DNS2__;
+          };
++        forward only;
+ 
+         //========================================================================
+         // If BIND logs error messages about the root key being expired,
+         // you will need to update your keys.  See https://www.isc.org/bind-keys
+         //========================================================================
+         dnssec-validation auto;
+-
++        max-cache-size 128M;
++        edns-udp-size 512;
+         auth-nxdomain no;    # conform to RFC1035
+         listen-on-v6 { any; };
+ };
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/onlyoffice.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/onlyoffice.sh
+@@ -7,7 +7,7 @@ sudo -i -u postgres psql -c "GRANT ALL p
+ 
+ sudo mkdir -p /srv/app/onlyoffice/DocumentServer/data/certs/
+ 
+-openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/ssl/onlyoffice/onlyoffice.key -out /etc/ssl/onlyoffice/onlyoffice.crt -subj "/C=ES/ST=Catalunya/L=Barcelona/O=Generalitat de Catalunya/OU=Departament Ensenyament/CN=xtec.cat"
++openssl req -x509 -nodes -days 36500 -newkey rsa:2048 -keyout /etc/ssl/onlyoffice/onlyoffice.key -out /etc/ssl/onlyoffice/onlyoffice.crt -subj "/C=ES/ST=Catalunya/L=Barcelona/O=Generalitat de Catalunya/OU=Departament Ensenyament/CN=xtec.cat"
+ 
+ docker pull onlyoffice/documentserver
+ 
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/rev.domini
++++ linkat-servidor-18.04/linkat-servidor/plantilles/rev.domini
+@@ -1,12 +1,10 @@
+ $TTL 86400
+ @   IN  SOA     __NAME__.__DOMAIN__. root.__DOMAIN__. (
+-        2011071002  ;Serial
++        2018090101  ;Serial
+         3600        ;Refresh
+         1800        ;Retry
+         604800      ;Expire
+         86400       ;Minimum TTL
+ )
+-@       IN  NS          __NAME__.__DOMAIN__.
+-@       IN  PTR         __DOMAIN__.
+-__NAME__     IN  A           __IP__
++@       IN  NS          __NAME__.
+ __IP4__     IN  PTR         __NAME__.__DOMAIN__.
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/smb-ldap.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/smb-ldap.conf
+@@ -1,30 +1,30 @@
+-#        passdb backend = ldapsam:"ldap://localhost/"
+-#        obey pam restrictions = no
+-#        ldap ssl = off
+-#        ldap admin dn = cn=admin,dc=__DOMAIN__
+-#        ldap delete dn = no
+-#
+-#        ## Sync UNIX password with Samba password
+-#        ## Method 1:
+-#        ldap password sync = yes
+-#        ## Method 2:
+-#        ;ldap password sync = yes 
+-#        ;unix password sync = yes
+-#        ;passwd program = /usr/sbin/smbldap-passwd -u '%u'
+-#        ;passwd chat = "Changing *\nNew password*" %n\n "*Retype new password*" %n\n"
+-#
+-#        ldap suffix = dc=__DOMAIN__
+-#        ldap user suffix = ou=people
+-#        ldap group suffix = ou=group
+-#        ldap machine suffix = ou=Machines
+-#        ldap idmap suffix = ou=Idmap
+-#
+-#        add user script = /usr/sbin/smbldap-useradd -m '%u' -t 1
+-#        rename user script = /usr/sbin/smbldap-usermod -r '%unew' '%uold'
+-#        delete user script = /usr/sbin/smbldap-userdel '%u'
+-#        set primary group script = /usr/sbin/smbldap-usermod -g '%g' '%u'
+-#        add group script = /usr/sbin/smbldap-groupadd -p '%g'
+-#        delete group script = /usr/sbin/smbldap-groupdel '%g'
+-#        add user to group script = /usr/sbin/smbldap-groupmod -m '%u' '%g'
+-#        delete user from group script = /usr/sbin/smbldap-groupmod -x '%u' '%g'
+-#        add machine script = /usr/sbin/smbldap-useradd -w '%u' -t 1
++        passdb backend = ldapsam:"ldap://localhost/"
++        obey pam restrictions = no
++        ldap ssl = off
++        ldap admin dn = cn=admin,dc=__DOMAIN__
++        ldap delete dn = no
++
++        ## Sync UNIX password with Samba password
++        ## Method 1:
++        ldap password sync = yes
++        ## Method 2:
++        ;ldap password sync = yes 
++        ;unix password sync = yes
++        ;passwd program = /usr/sbin/smbldap-passwd -u '%u'
++        ;passwd chat = "Changing *\nNew password*" %n\n "*Retype new password*" %n\n"
++
++        ldap suffix = dc=__DOMAIN__
++        ldap user suffix = ou=people
++        ldap group suffix = ou=group
++        ldap machine suffix = ou=Computers
++        ldap idmap suffix = ou=Idmap
++
++        add user script = /usr/sbin/smbldap-useradd -m '%u' -t 1
++        rename user script = /usr/sbin/smbldap-usermod -r '%unew' '%uold'
++        delete user script = /usr/sbin/smbldap-userdel '%u'
++        set primary group script = /usr/sbin/smbldap-usermod -g '%g' '%u'
++        add group script = /usr/sbin/smbldap-groupadd -p '%g'
++        delete group script = /usr/sbin/smbldap-groupdel '%g'
++        add user to group script = /usr/sbin/smbldap-groupmod -m '%u' '%g'
++        delete user from group script = /usr/sbin/smbldap-groupmod -x '%u' '%g'
++        add machine script = /usr/sbin/smbldap-useradd -w '%u' -t 1
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/smb.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/smb.conf
+@@ -9,7 +9,6 @@
+         max log size = 5000
+         debug pid = yes
+         debug uid = yes
+-        syslog = 0
+         utmp = no 
+ 
+         security = user
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/webmin.acl
++++ linkat-servidor-18.04/linkat-servidor/plantilles/webmin.acl
+@@ -1,2 +1,2 @@
+ root: acl adsl-client ajaxterm apache at backup-config bacula-backup bandwidth bind8 burner change-user cluster-copy cluster-cron cluster-passwd cluster-shell cluster-software cluster-useradmin cluster-usermin cluster-webmin cpan cron custom dfsadmin dhcpd dovecot exim exports fail2ban fdisk fetchmail file filemin filter firewall firewall6 firewalld fsdump grub heartbeat htaccess-htpasswd idmapd inetd init inittab ipfilter ipfw ipsec iscsi-client iscsi-server iscsi-target iscsi-tgtd jabber krb5 ldap-client ldap-server ldap-useradmin logrotate lpadmin lvm mailboxes mailcap man mon mount mysql net nis openslp package-updates pam pap passwd phpini postfix postgresql ppp-client pptp-client pptp-server proc procmail proftpd qmailadmin quota raid samba sarg sendmail servers shell shorewall shorewall6 smart-status smf software spam squid sshd status stunnel syslog-ng syslog system-status tcpwrappers telnet time tunnel updown useradmin usermin vgetty webalizer webmin webmincron webminlog wuftpd xinetd
+-lnadmin: ldap-useradmin
++lnadmin: system-status ldap-useradmin
