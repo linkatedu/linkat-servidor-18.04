@@ -1,0 +1,5 @@
+linkat-servidor (18.04-1) bionic; urgency=medium
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Pablo Vigo <pvigo@xtec.cat>  Tue, 10 Jul 2018 15:43:32 +0200

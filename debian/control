@@ -1,0 +1,13 @@
+Source: linkat-servidor
+Section: linkat
+Priority: optional
+Maintainer: Pablo Vigo <pvigo@xtec.cat>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.1.2
+Homepage: http://linkat.xtec.cat
+
+Package: linkat-servidor
+Architecture: all
+Depends: linkat-lnadmin, linkat-anuser, linkat-ansible, linkat-mp-servidor
+Description: Linkat servidor de centre
+ Linkat servidor de centre proporciona un configurador dels serveis necessaris als centres educatius. Autenticació d'usuaris LDAP, compartició de fitxers en xarxa SAMBA i NFS, Nextcloud, Onlyoffice i molt més.
