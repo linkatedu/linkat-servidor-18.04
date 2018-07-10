@@ -1,0 +1,292 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-6) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-08-13
+
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -197,20 +197,16 @@ ansible-playbook "$ANSIBLEPLAY"/server.y
+ 
+ ## Configurant servidor LDAP
+ cd "$FILES_LINKAT"/
+-./ldap.sh
+-./smbldap-populate.sh
+-
++"$FILES_LINKAT"/ldap.sh
++"$FILES_LINKAT"/smbldap-populate.sh
+ 
+ ## Aplicant Playbook permisos
+ ansible-playbook "$ANSIBLEPLAY"/permisos.yml
+ sudo chmod -R +x /srv/exports/*
+ 
+ ## Nextcloud
+-sudo snap install nextcloud
+-nextcloud.manual-install lnadmin linkat
+-sudo nextcloud.enable-https self-signed
+-sudo snap set nextcloud ports.http=81
+-sudo snap set nextcloud ports.https=10443
++"$FILES_LINKAT"/nextcloud.sh
+ 
+ ## Onlyoffice
+-/usr/share/linkat/linkat-onlyoffice/linkat-onlyoffice.sh
++"$FILES_LINKAT"/onlyoffice.sh
++
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/debconf.onlyoffice-documentserver
+@@ -0,0 +1,17 @@
++onlyoffice-documentserver	onlyoffice/rabbitmq-pwd	password	guest
++onlyoffice-documentserver	onlyoffice/db-pwd	password	__PASSLNADMIN__
++onlyoffice-documentserver	onlyoffice/db-host	string	localhost
++onlyoffice-documentserver	onlyoffice/docservice-port	string	8000
++onlyoffice-documentserver	onlyoffice/spellchecker-port	string	8080
++onlyoffice-documentserver	onlyoffice/ds-port	string	80
++onlyoffice-documentserver	onlyoffice/example-port	string	3000
++onlyoffice-documentserver	onlyoffice/jwt-header	string	Authorization
++onlyoffice-documentserver	onlyoffice/rabbitmq-user	string	guest
++onlyoffice-documentserver	onlyoffice/cluster-mode	boolean	false
++onlyoffice-documentserver	onlyoffice/db-user	string	onlyoffice
++onlyoffice-documentserver	onlyoffice/db-name	string	onlyoffice
++onlyoffice-documentserver	onlyoffice/remove-db	boolean	false
++onlyoffice-documentserver	onlyoffice/rabbitmq-host	string	localhost
++onlyoffice-documentserver	onlyoffice/jwt-enabled	boolean	false
++onlyoffice-documentserver	onlyoffice/redis-host	string	localhost
++onlyoffice-documentserver	onlyoffice/jwt-secret	string	secret
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/nextcloud.sh
+@@ -0,0 +1,34 @@
++## Nextcloud
++sudo snap install nextcloud
++nextcloud.manual-install lnadmin __PASSLNADMIN__
++sudo nextcloud.enable-https self-signed
++sudo snap set nextcloud ports.http=81
++sudo snap set nextcloud ports.https=10443
++sudo snap run nextcloud.occ app:install user_ldap
++sudo snap run nextcloud.occ app:enable user_ldap
++sudo nextcloud.occ config:app:set user_ldap ldapAgentName --value="dc=__DOMAIN__"
++sudo nextcloud.occ config:app:set user_ldap ldapBase --value="dc=__DOMAIN__"
++sudo nextcloud.occ config:app:set ldap_agent_password --value="__PASSROOT__"
++sudo nextcloud.occ config:app:set user_ldap ldap_base --value="dc=__DOMAIN__"
++sudo nextcloud.occ config:app:set user_ldap ldap_base_groups --value="dc=__DOMAIN__"
++sudo nextcloud.occ config:app:set user_ldap ldap_base_users --value="dc=__DOMAIN__"
++sudo nextcloud.occ config:app:set ldap_configuration_active --value="1"
++sudo nextcloud.occ config:app:set ldap_display_name --value="cn"
++sudo nextcloud.occ config:app:set ldap_dn --value="cn=admin,dc=__DOMAIN__"
++sudo nextcloud.occ config:app:set ldap_group_filter --value="(&(|(objectclass=posixGroup)))"
++sudo nextcloud.occ config:app:set ldap_group_member_assoc_attribute --value="gidNumber"
++sudo nextcloud.occ config:app:set ldap_groupfilter_objectclass --value="posixGroup"
++sudo nextcloud.occ config:app:set ldap_host --value="localhost"
++sudo nextcloud.occ config:app:set ldap_login_filter --value="(&(|(objectclass=inetOrgPerson)(objectclass=organizationalPerson)(objectclass=person))(|(cn=%uid)(gidNumber=%uid)(homeDirectory=%uid)(loginShell=%uid)))"
++sudo nextcloud.occ config:app:set ldap_loginfilter_attributes --value="cn\ngidNumber\nhomeDirectory\nloginShell"
++sudo nextcloud.occ config:app:set ldap_port --value="389"
++sudo nextcloud.occ config:app:set ldap_tls --value="0"
++sudo nextcloud.occ config:app:set ldap_userfilter_objectclass --value="inetOrgPerson\norganizationalPerson\nperson"
++sudo nextcloud.occ config:app:set ldap_userlist_filter --value="(|(objectclass=inetOrgPerson)(objectclass=organizationalPerson)(objectclass=person))"
++sudo nextcloud.occ config:app:set types --value="authentication"
++sudo nextcloud.occ app:install onlyoffice
++sudo nextcloud.occ app:enable onlyoffice
++sudo nextcloud.occ config:app:set onlyoffice DocumentServerUrl --value="https://__IP__:10445/"
++#sudo nextcloud.occ config:app:set --value https:\/\/__IP__:10445\/ onlyoffice DocumentServerUrl
++sudo nextcloud.occ config:system:set onlyoffice verify_peer_off --value="true"
++
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/onlyoffice.sh
+@@ -0,0 +1,66 @@
++#!/bin/bash
++
++. /etc/linkat/linkat-servidor/linkat-servidor.conf
++
++LOG=/var/log/linkat-onlyoffice.log
++
++# Check Internet connection. Necessary for the installation.
++wget -q --tries=10 --timeout=20 --spider http://google.com
++if [[ $? -eq 0 ]]; then
++        echo "Online" >> $LOG
++else
++        $ZENITY --error --title="Instal·lació Onlyoffice" --text="Error: No hi ha connexió a Internet.\n\nEl programa d'instal·lació s'aturarà."
++                                exit 1
++fi
++
++# Create onlyoffice database
++sudo -i -u postgres psql -c "CREATE DATABASE onlyoffice;"
++sudo -i -u postgres psql -c "CREATE USER onlyoffice WITH password '__PASSLNADMIN__';"
++sudo -i -u postgres psql -c "GRANT ALL privileges ON DATABASE onlyoffice TO onlyoffice;"
++
++# Kill update programs and update repository info.
++killall update-manager update-notifier  > /dev/null 2>&1
++sudo apt-get update
++if [ ! $? -eq 0 ]; then
++        $ZENITY --error --text="Error a l'actualitzar els repositoris.\nComproveu la vostra connexió a Internet.\n"
++        echo -en "Error a l'actualitzar els repositoris.\nComproveu la vostra connexió a Internet.\n" >> $LOG
++        exit 1
++fi
++
++sudo debconf-set-selections /usr/share/linkat/linkat-servidor/configurador/files/debconf.onlyoffice-documentserver
++
++killall update-manager update-notifier  > /dev/null 2>&1
++sudo apt-get install -y onlyoffice-documentserver --force-yes
++if [ ! $? -eq 0 ]; then
++        $ZENITY --error --text="Error a l'instal·lar el programa.\n"
++        echo -en "Error a l'instal·lar el programa.\n" >> $LOG
++        exit 1
++fi
++echo -en "Configurant el servei nginx..."
++# Stop nginx service
++sudo service nginx stop
++
++# Generar certificat
++mkdir -p /etc/ssl/onlyoffice/
++openssl req -x509 -nodes -days 36500 -newkey rsa:2048 -keyout /etc/ssl/onlyoffice/onlyoffice.key -out /etc/ssl/onlyoffice/onlyoffice.crt -subj "/C=ES/ST=Catalunya/L=Barcelona/O=Generalitat de Catalunya/OU=Departament Ensenyament/CN=xtec.cat"
++
++chattr -i /etc/nginx/conf.d/onlyoffice-documentserver.conf
++
++# Copy nginx config file for onlyoffice
++sudo cp -f /usr/share/linkat/linkat-onlyoffice/onlyoffice-documentserver.conf /etc/nginx/conf.d/onlyoffice-documentserver.conf
++
++# Start nginx service.
++sudo service nginx start
++if [ ! $? -eq 0 ]; then
++        $ZENITY --error --text="Error a l'iniciar el servei nginx.\n"
++        echo -en "Error a l'iniciar el servei nginx.\n" >> $LOG
++        exit 1
++else
++        echo -en "Servei nginx en funcionament."\n
++fi
++
++$ZENITY --info --title="Instal·lació OnlyOffice" --text="OnlyOffice s'ha instal·lat en aquest servidor.\n\nEls clients han d'acceptar el certificat des d'aquesta URL\n\nhttps://$NEW_IP:10445"
++
++chattr +i /etc/nginx/conf.d/onlyoffice-documentserver.conf
++
++touch /etc/Linkat/linkat-onlyoffice/config
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/smbldap-populate.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/smbldap-populate.sh
+@@ -2,9 +2,9 @@
+ 
+ spawn smbldap-populate -g 10000 -u 10000 -r 10000 
+ expect "New password:"
+-send -- "$NEW_PASSROOT\r"
++send -- "__PASSROOT__\r"
+ 
+ expect "Retype new password:"
+-send -- "$NEW_PASSROOT\r"
++send -- "__PASSROOT__\r"
+ 
+ expect eof
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/webldap-useradminconfig
+@@ -0,0 +1,72 @@
++imap_foldersep=.
++secmode=0
++samba_gclass=sambaGroup
++imap_login=cyrus
++multi_fields=0
++alias_same=0
++auth_ldap=/etc/libnss-ldap.conf
++given=0
++imap_def=0
++imap_class=SuSEeMailObject
++md5=0
++samba_class=sambaSamAccount
++given_class=inetOrgPerson
++shells=fixed,passwd,shells
++mailfmt=0
++person=1
++membox=0
++slappasswd=slappasswd
++samba_def=1
++ldap_tls=0
++gecos=1
++imap_folders=old	public	sent-mail
++given_order=0
++quota_support=0
++login=
++default_shell=
++maillocaladdress=
++group_fields=
++user_files=
++pre_command=
++user_filter=
++post_command=
++noclash=
++group_props=
++random_password=
++group_filter=
++mod_props=
++quota=
++homedir_perms=
++imap_host=
++imap_folderalt=
++samba_props=
++props=
++base_uid=
++user_base=
++other_class=
++default_max=
++addressbook=
++default_min=
++gother_class=
++samba_domain=
++home_style=
++domain=
++default_other=
++charset=
++display_max=
++passwd_stars=
++default_expire=
++ldap_port=
++default_warn=
++default_secs=
++group_base=
++group_mod_props=
++imap_props=
++default_inactive=
++fields=
++base_gid=
++default_group=
++home_base=
++imap_pass=
++samba_gid=
++ldap_host=
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/websambaconfig
+@@ -0,0 +1,21 @@
++start_cmd=/etc/init.d/samba start || (/etc/init.d/nmbd start ; /etc/init.d/smbd start)
++list_printers_command=lpc status | grep "[A-z0-9]:" | sed -e 's/://g'
++samba_password_program=/usr/bin/smbpasswd
++text_lists=0
++samba_server=/usr/sbin/smbd
++swat=/usr/sbin/swat
++sort_mode=0
++smb_passwd=/etc/samba/smbpasswd
++smb_conf=/etc/samba/smb.conf
++restart_cmd=/etc/init.d/samba restart || (/etc/init.d/nmbd restart ; /etc/init.d/smbd restart)
++samba_status_program=/usr/bin/smbstatus
++stop_cmd=/etc/init.d/samba stop || (/etc/init.d/nmbd stop ; /etc/init.d/smbd stop)
++dont_convert=-499
++name_server=/usr/sbin/nmbd
++pdbedit=/usr/bin/pdbedit
++net=/usr/bin/net
++run_from_inetd=0
++smbgroupedit=/usr/bin/smbgroupedit
++sync_gid=
++sync_change=1
++sync_add=1
