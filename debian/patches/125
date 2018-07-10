@@ -1,0 +1,53 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-124) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Francesc Konate <linkat@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2019-09-13
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/ldap/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/ldap/tasks/main.yml
+@@ -55,17 +55,17 @@
+ - name: Copiant fitxers de configuració APPARMOR
+   copy: src=files/usr.bin.freshclam dest=/etc/apparmor.d/usr.bin.freshclam
+ 
+-- name: Copiant fitxers de configuració APPARMOR
+-  copy: src=files/usr.lib.snapd.snap-confine.real dest=/etc/apparmor.d/usr.lib.snapd.snap-confine.real
++  #- name: Copiant fitxers de configuració APPARMOR
++  # copy: src=files/usr.lib.snapd.snap-confine.real dest=/etc/apparmor.d/usr.lib.snapd.snap-confine.real
+ 
+-- name: Copiant fitxers de configuració APPARMOR
+-  copy: src=files/usr.sbin.clamd dest=/etc/apparmor.d/usr.sbin.clamd
++  # - name: Copiant fitxers de configuració APPARMOR
++  # copy: src=files/usr.sbin.clamd dest=/etc/apparmor.d/usr.sbin.clamd
+ 
+-- name: Copiant fitxers de configuració APPARMOR
+-  copy: src=files/usr.sbin.cupsd dest=/etc/apparmor.d/usr.sbin.cupsd
++  # - name: Copiant fitxers de configuració APPARMOR
++  #copy: src=files/usr.sbin.cupsd dest=/etc/apparmor.d/usr.sbin.cupsd
+ 
+-- name: Copiant fitxers de configuració APPARMOR
+-  copy: src=files/usr.sbin.ntpd dest=/etc/apparmor.d/usr.sbin.ntpd
++  #- name: Copiant fitxers de configuració APPARMOR
++  #copy: src=files/usr.sbin.ntpd dest=/etc/apparmor.d/usr.sbin.ntpd
+ 
+ - file:
+         path: /usr/share/lightdm/lightdm.conf.d/80-linkat-server-lightdm.conf
