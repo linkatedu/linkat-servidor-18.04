@@ -1,0 +1,117 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-95) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2019-05-22
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/acl/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/acl/tasks/main.yml
+@@ -73,6 +73,20 @@
+         entry: "group:Editors:rwx"
+         recursive: yes
+ 
++- name: Verificant ACL Administradors unitat S
++  acl:
++        path: /srv/exports/S
++        state: present
++        entry: "default:group:Administradors:rwx"
++        recursive: yes
++
++- name: Verificant ACL Administradors unitat S
++  acl:
++        path: /srv/exports/S
++        state: present
++        entry: "group:Administradors:rwx"
++        recursive: yes
++
+ - name: Verificant ACL Paperera P
+   acl:
+         path: /srv/exports/Paperera/Paperera_Unitat_P
+@@ -661,3 +675,16 @@
+         recursive: yes
+         state: present
+ 
++- name: Verificant ACL clamav unitats Calibre
++  acl:
++        path: /srv/calibre
++        state: present
++        entry: "default:user:clamav:rwx"
++        recursive: yes
++
++- name: Verificant ACL clamav unitats Calibre
++  acl:
++        path: /srv/calibre
++        state: present
++        entry: "user:clamav:rwx"
++        recursive: yes
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/permisos/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/permisos/tasks/main.yml
+@@ -58,7 +58,7 @@
+         state: directory
+         owner: root
+         group: Administradors
+-        mode: 06775
++        mode: 02775
+ 
+ - name: Verificant Paperera P
+   file:
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/linkat-clamdscan
++++ linkat-servidor-18.04/linkat-servidor/plantilles/linkat-clamdscan
+@@ -10,13 +10,16 @@ echo "################################"
+ 
+ date >> $LOG
+ 
++for FOLDER in /srv/exports /srv/calibre; do
++
+ if [ -f $CONTROL ] ; then
+-	/usr/bin/nice -n 19 /usr/bin/ionice -c2 -n7 find /srv/exports -type f -cnewer $CONTROL -print0 | xargs -0 -r clamdscan --multiscan --fdpass --infected --log=$LOG --move=/var/quarantine --quiet
++	/usr/bin/nice -n 19 /usr/bin/ionice -c2 -n7 find $FOLDER -type f -cnewer $CONTROL -print0 | xargs -0 -r clamdscan --multiscan --fdpass --infected --log=$LOG --move=/var/quarantine --quiet
+ 	touch $CONTROL
+ else
+-	/usr/bin/nice -n 19 /usr/bin/ionice -c2 -n7 find  /srv/exports -type f -print0 | xargs -0 -r clamdscan --multiscan --fdpass --infected --log=$LOG --move=/var/quarantine --quiet
++	/usr/bin/nice -n 19 /usr/bin/ionice -c2 -n7 find $FOLDER -type f -print0 | xargs -0 -r clamdscan --multiscan --fdpass --infected --log=$LOG --move=/var/quarantine --quiet
+ 	touch $CONTROL
+ fi
++done
+ 
+ date >> $LOG
+ echo "################################" >> $LOG
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/nextcloud-restart.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/nextcloud-restart.sh
+@@ -10,6 +10,7 @@ else
+ sudo nextcloud.enable-https self-signed
+ sudo snap set nextcloud ports.http=81
+ sudo snap set nextcloud ports.https=10443
++sudo snap set nextcloud php.memory-limit=512M
+ sudo nextcloud.occ config:system:set trusted_domains 1 --value="__IP__"
+ sudo nextcloud.occ config:system:set trusted_domains 2 --value="__NAME__.__DOMAIN__"
+ sudo snap run nextcloud.occ app:install user_ldap
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/nextcloud.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/nextcloud.sh
+@@ -11,6 +11,7 @@ fi
+ sudo nextcloud.enable-https self-signed
+ sudo snap set nextcloud ports.http=81
+ sudo snap set nextcloud ports.https=10443
++sudo snap set nextcloud php.memory-limit=512M
+ sudo nextcloud.occ config:system:set trusted_domains 1 --value="__IP__"
+ sudo nextcloud.occ config:system:set trusted_domains 2 --value="__NAME__.__DOMAIN__"
+ sudo snap run nextcloud.occ app:install user_ldap
