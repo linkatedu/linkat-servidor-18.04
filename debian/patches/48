@@ -1,0 +1,110 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-48) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-11-09
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/ldap/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/ldap/tasks/main.yml
+@@ -5,8 +5,8 @@
+ - name: Aplicant la configuració del paquet ldap-auth-config
+   command: debconf-set-selections /usr/share/linkat/linkat-servidor/configurador/files/debconf.ldap-auth-config
+ 
+-- name: Aplicant la configuració del paquet auth-client-config
+-  command: debconf-set-selections /usr/share/linkat/linkat-servidor/configurador/files/debconf.auth-client-config
++- name: Aplicant la configuració del paquet nslcd
++  command: debconf-set-selections /usr/share/linkat/linkat-servidor/configurador/files/debconf.nslcd
+ 
+ - name: Instal·lant els paquets del servidor LDAP
+   apt: pkg={{ item }} state=present update_cache=yes
+@@ -14,6 +14,11 @@
+   - slapd
+   - ldap-utils
+   - ldap-auth-config
++  - nslcd
++  - nscd
++  - libpam-ldapd
++  - nss-updatedb
++  - libnss-ldap
+   - auth-client-config
+ 
+ - name: Copiant fitxers de configuració LDAP
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -229,7 +229,7 @@ killall update-manager update-notifier >
+ dpkg -s slapd > /dev/null 2>&1
+ res="$?"
+ if [ "$res" -eq 0 ]; then
+-	sudo apt purge slapd ldap-auth-config auth-client-config -y
++	sudo apt purge slapd ldap-auth-config auth-client-config libnss-ldap libnss-ldapd nss-updatedb nscd nslcd -y
+ fi
+ 
+ ## Aplicant Playbook LDAP
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/debconf.ldap-auth-config
++++ linkat-servidor-18.04/linkat-servidor/plantilles/debconf.ldap-auth-config
+@@ -1,12 +1,10 @@
+-ldap-auth-config        ldap-auth-config/rootbindpw     password        __PASSROOT__
+-ldap-auth-config        ldap-auth-config/bindpw password        __PASSROOT__
+-ldap-auth-config        ldap-auth-config/pam_password   select  md5
+-ldap-auth-config        ldap-auth-config/override       boolean true
+-ldap-auth-config        ldap-auth-config/dbrootlogin    boolean true
+-ldap-auth-config        ldap-auth-config/move-to-debconf        boolean true
+-ldap-auth-config        ldap-auth-config/binddn string  cn=proxyuser,dc=example,dc=net
+-ldap-auth-config        ldap-auth-config/ldapns/base-dn string  dc=__DOMAIN__
+-ldap-auth-config        ldap-auth-config/dblogin        boolean false
+-ldap-auth-config        ldap-auth-config/ldapns/ldap_version    select  3
+-ldap-auth-config        ldap-auth-config/ldapns/ldap-server     string  ldap:///127.0.0.1
+-ldap-auth-config        ldap-auth-config/rootbinddn     string  cn=admin,dc=__DOMAIN__
++ldap-auth-config	ldap-auth-config/ldapns/ldap-server	string	ldap://__IP__
++ldap-auth-config	ldap-auth-config/move-to-debconf	boolean	true
++ldap-auth-config	ldap-auth-config/dbrootlogin	boolean	false
++ldap-auth-config	ldap-auth-config/ldapns/ldap_version	select	3
++ldap-auth-config	ldap-auth-config/override	boolean	true
++ldap-auth-config	ldap-auth-config/dblogin	boolean	false
++ldap-auth-config	ldap-auth-config/pam_password	select	md5
++ldap-auth-config	ldap-auth-config/binddn	string	cn=proxyuser,dc=__DOMAIN__
++ldap-auth-config	ldap-auth-config/rootbinddn	string	cn=admin,dc=__DOMAIN__
++ldap-auth-config	ldap-auth-config/ldapns/base-dn	string	dc=__DOMAIN__
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/debconf.nslcd
+@@ -0,0 +1,21 @@
++nslcd	nslcd/ldap-bindpw	password	
++nslcd	nslcd/ldap-starttls	boolean	false
++nslcd	nslcd/ldap-sasl-secprops	string	
++nslcd	nslcd/ldap-cacertfile	string	/etc/ssl/certs/ca-certificates.crt
++nslcd	libraries/restart-without-asking	boolean	false
++nslcd	nslcd/ldap-uris	string	ldap://__IP__
++nslcd	nslcd/ldap-base	string	dc=__DOMAIN__
++nslcd	nslcd/ldap-reqcert	select	
++# Services to restart for nslcd upgrade:
++nslcd	nslcd/restart-services	string	
++# Failure restarting some services for nslcd upgrade
++nslcd	nslcd/restart-failed	error	
++nslcd	nslcd/disable-screensaver	error	
++nslcd	nslcd/xdm-needs-restart	error	
++nslcd	nslcd/ldap-binddn	string	
++nslcd	nslcd/ldap-sasl-authzid	string	
++nslcd	nslcd/ldap-sasl-mech	select	
++nslcd	nslcd/ldap-sasl-realm	string	
++nslcd	nslcd/ldap-sasl-krb5-ccname	string	/var/run/nslcd/nslcd.tkt
++nslcd	nslcd/ldap-sasl-authcid	string	
++nslcd	nslcd/ldap-auth-type	select	none
