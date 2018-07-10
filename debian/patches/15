@@ -1,0 +1,80 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-15) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-08-21
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/acl/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/acl/tasks/main.yml
+@@ -351,3 +351,18 @@
+         entry: "user:lnadmin:rwx"
+         recursive: yes
+         state: present
++
++- name: Verificant ACL minidlna unitats M
++  acl:
++        path: /srv/exports/M
++        state: present
++        entry: "user:minidlna:rwx"
++        recursive: yes
++
++- name: Verificant ACL minidlna unitats M
++  acl:
++        path: /srv/exports/M
++        state: present
++        entry: "default:user:minidlna:rwx"
++        recursive: yes
++
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/smb/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/smb/tasks/main.yml
+@@ -17,6 +17,9 @@
+ - name: Copiant fitxers de configuració SAMBA
+   copy: src=files/gestio.conf dest=/etc/samba/smb.conf.d/
+ 
++- name: Copiant fitxers de configuració SAMBA
++  copy: src=files/smb-ldap.conf dest=/etc/samba/smb.conf.d/
++
+ - file:
+         path: /etc/samba/smb.conf
+         owner: root
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/50-linkat-net-config.yaml
++++ linkat-servidor-18.04/linkat-servidor/plantilles/50-linkat-net-config.yaml
+@@ -8,4 +8,4 @@ network:
+       gateway4: __GW__
+       nameservers:
+           search: [__DOMAIN__, __NAME__.__DOMAIN__]
+-          addresses: [__IP__, __DNS1__, __DNS2__]
++          addresses: [127.0.0.1, __DNS1__, __DNS2__]
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/libnss-ldap.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/libnss-ldap.conf
+@@ -27,9 +27,9 @@
+ base dc=__DOMAIN__
+ 
+ # Another way to specify your LDAP server is to provide an
+-uri ldap://__NAME__.__DOMAIN__
++#uri ldap://__NAME__.__DOMAIN__
+ # Unix Domain Sockets to connect to a local LDAP Server.
+-#uri ldap://127.0.0.1/
++uri ldap://127.0.0.1/
+ #uri ldaps://127.0.0.1/   
+ #uri ldapi://%2fvar%2frun%2fldapi_sock/
+ # Note: %2f encodes the '/' used as directory separator
