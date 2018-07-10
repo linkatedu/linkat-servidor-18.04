@@ -1,0 +1,556 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-10) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-08-16
+
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/configurador/acl.yml
+@@ -0,0 +1,9 @@
++---
++- name: Permisos unitats compartides 
++  hosts: servidor
++  remote_user: anuser
++  become: yes
++  become_method: sudo
++
++  roles:
++    - acl 
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/acl/tasks/main.yml
+@@ -0,0 +1,323 @@
++---
++- name: Verificant ACL unitat P
++  acl:
++        path: /srv/exports/P
++        state: present
++        entry: "default:group::rwx"
++        
++- name: Verificant ACL unitats S
++  acl:
++        path: /srv/exports/S
++        state: present
++        entry: "default:group::rwx"
++
++- name: Verificant ACL unitats T
++  acl:
++        path: /srv/exports/T
++        state: present
++        entry: "default:group::rwx"
++
++- name: Verificant ACL unitats M
++  acl:
++        path: /srv/exports/M
++        state: present
++        entry: "default:group::rwx"
++
++- name: Verificanti ACL unitats G
++  acl:
++        path: /srv/exports/G
++        state: present
++        entry: "default:group::rwx"
++
++- name: Verificant ACL Editors unitat S
++  acl:
++        path: /srv/exports/S
++        state: present
++        entry: "default:group:Editors:rwx"
++        recursive: yes
++
++- name: Verificant ACL Editors unitat S
++  acl:
++        path: /srv/exports/S
++        state: present
++        entry: "group:Editors:rwx"
++        recursive: yes
++
++- name: Verificant ACL Paperera P
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_P
++        state: present
++        entry: "default:group::rwx"
++        recursive: yes
++
++- name: Verificant ACL Paperera S
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_S
++        state: present
++        entry: "default:group::rwx"
++        recursive: yes
++
++- name: Verificant ACL Paperera T
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_T
++        state: present
++        entry: "default:group::rwx"
++        recursive: yes
++
++- name: Verificant ACL Paperera M
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_M
++        entry: "default:group::rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL Paperera G
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_G
++        entry: "default:group::rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL lnadmin unitat Quarantine
++  acl:
++        path: /var/quarantine
++        state: present
++        entry: "default:user:lnadmin:rwx"
++        recursive: yes
++
++- name: Verificant ACL lnadmin unitat Quarantine
++  acl:
++        path: /var/quarantine
++        state: present
++        entry: "user:lnadmin:rwx"
++        recursive: yes
++
++- name: Verificant ACL lnadmin unitats S
++  acl:
++        path: /srv/exports/S
++        state: present
++        entry: "default:user:lnadmin:rwx"
++        recursive: yes
++
++- name: Verificant ACL lnadmin unitats G
++  acl:
++        path: /srv/exports/G
++        state: present
++        entry: "default:user:lnadmin:rwx"
++        recursive: yes
++
++- name: Verificant ACL lnadmin unitats M
++  acl:
++        path: /srv/exports/M
++        state: present
++        entry: "default:user:lnadmin:rwx"
++        recursive: yes
++
++- name: Verificant ACL lnadmin unitats P
++  acl:
++        path: /srv/exports/P
++        state: present
++        entry: "default:user:lnadmin:rwx"
++        recursive: yes
++
++- name: Verificant ACL lnadmin unitats S
++  acl:
++        path: /srv/exports/S
++        state: present
++        entry: "user:lnadmin:rwx"
++        recursive: yes
++
++- name: Verificant ACL lnadmin unitats G
++  acl:
++        path: /srv/exports/G
++        state: present
++        entry: "user:lnadmin:rwx"
++        recursive: yes
++
++- name: Verificant ACL lnadmin unitats M
++  acl:
++        path: /srv/exports/M
++        state: present
++        entry: "user:lnadmin:rwx"
++        recursive: yes
++
++- name: Verificant ACL lnadmin unitats P
++  acl:
++        path: /srv/exports/P
++        state: present
++        entry: "user:lnadmin:rwx"
++        recursive: yes
++
++- name: Verificant ACL clamav unitats S
++  acl:
++        path: /srv/exports/S
++        state: present
++        entry: "default:user:clamav:rwx"
++        recursive: yes
++
++- name: Verificant ACL clamav unitats G
++  acl:
++        path: /srv/exports/G
++        state: present
++        entry: "default:user:clamav:rwx"
++        recursive: yes
++
++- name: Verificant ACL clamav unitats M
++  acl:
++        path: /srv/exports/M
++        state: present
++        entry: "default:user:clamav:rwx"
++        recursive: yes
++
++- name: Verificant ACL clamav unitats P
++  acl:
++        path: /srv/exports/P
++        state: present
++        entry: "default:user:clamav:rwx"
++        recursive: yes
++- name: Verificant ACL clamav unitats S
++  acl:
++        path: /srv/exports/S
++        state: present
++        entry: "user:clamav:rwx"
++        recursive: yes
++
++- name: Verificant ACL clamav unitats G
++  acl:
++        path: /srv/exports/G
++        state: present
++        entry: "user:clamav:rwx"
++        recursive: yes
++
++- name: Verificant ACL clamav unitats M
++  acl:
++        path: /srv/exports/M
++        state: present
++        entry: "user:clamav:rwx"
++        recursive: yes
++
++- name: Verificant ACL clamav unitats P
++  acl:
++        path: /srv/exports/P
++        state: present
++        entry: "user:clamav:rwx"
++        recursive: yes
++
++- name: Verificant ACL clamav Paperera T
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_T
++        state: present
++        entry: "default:user:clamav:rwx"
++        recursive: yes
++
++- name: Verificant ACL clamav Paperera M
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_M
++        entry: "default:user:clamav:rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL clamav Paperera G
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_G
++        entry: "default:user:clamav:rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL clamav Paperera P
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_P
++        entry: "default:user:clamav:rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL clamav Paperera T
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_T
++        state: present
++        entry: "user:clamav:rwx"
++        recursive: yes
++
++- name: Verificant ACL clamav Paperera M
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_M
++        entry: "user:clamav:rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL clamav Paperera G
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_G
++        entry: "user:clamav:rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL clamav Paperera P
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_P
++        entry: "user:clamav:rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL Gestio Paperera G
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_G
++        entry: "g:Gestio:rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL lnadmin Paperera T
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_T
++        state: present
++        entry: "default:user:lnadmin:rwx"
++        recursive: yes
++
++- name: Verificant ACL lnadmin Paperera M
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_M
++        entry: "default:user:lnadmin:rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL lnadmin Paperera G
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_G
++        entry: "default:user:lnadmin:rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL lnadmin Paperera P
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_P
++        entry: "default:user:lnadmin:rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL lnadmin Paperera T
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_T
++        state: present
++        entry: "user:lnadmin:rwx"
++        recursive: yes
++
++- name: Verificant ACL lnadmin Paperera M
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_M
++        entry: "user:lnadmin:rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL lnadmin Paperera G
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_G
++        entry: "user:lnadmin:rwx"
++        recursive: yes
++        state: present
++
++- name: Verificant ACL lnadmin Paperera P
++  acl:
++        path: /srv/exports/Paperera/Paperera_Unitat_P
++        entry: "user:lnadmin:rwx"
++        recursive: yes
++        state: present
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/onlyoffice/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/onlyoffice/tasks/main.yml
+@@ -13,7 +13,7 @@
+ - name: Generant claus Onlyoffice
+   command: openssl req -x509 -nodes -days 36500 -newkey rsa:2048 -keyout /etc/ssl/onlyoffice/onlyoffice.key -out /etc/ssl/onlyoffice/onlyoffice.crt -subj "/C=ES/ST=Catalunya/L=Barcelona/O=Generalitat de Catalunya/OU=Departament Ensenyament/CN=xtec.cat"
+ 
+-- name: Instal·lant els paquets del servidor LDAP
++- name: Instal·lant els paquets de l'Onlyoffice 
+   apt: pkg={{ item }} state=present update_cache=yes
+   with_items:
+   - onlyoffice-documentserver 
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/permisos/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/permisos/tasks/main.yml
+@@ -62,7 +62,7 @@
+ 
+ - name: Verificant Paperera P
+   file:
+-        path: /srv/exports/Paperera/P
++        path: /srv/exports/Paperera/Paperera_Unitat_P
+         state: directory
+         owner: root
+         group: Professorat
+@@ -71,7 +71,7 @@
+ 
+ - name: Verificant Paperera S
+   file:
+-        path: /srv/exports/Paperera/S
++        path: /srv/exports/Paperera/Paperera_Unitat_S
+         state: directory
+         owner: root
+         group: Administradors
+@@ -80,7 +80,7 @@
+ 
+ - name: Verificant Paperera T
+   file:
+-        path: /srv/exports/Paperera/T
++        path: /srv/exports/Paperera/Paperera_Unitat_T
+         state: directory
+         owner: nobody
+         group: Administradors
+@@ -89,7 +89,7 @@
+ 
+ - name: Verificant Paperera M
+   file:
+-        path: /srv/exports/Paperera/M
++        path: /srv/exports/Paperera/Paperera_Unitat_M
+         state: directory
+         owner: root
+         group: Professorat
+@@ -98,7 +98,7 @@
+ 
+ - name: Verificant Paperera G
+   file:
+-        path: /srv/exports/Paperera/G
++        path: /srv/exports/Paperera/Paperera_Unitat_G
+         state: directory
+         owner: root
+         group: Gestio
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/unitats/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/unitats/tasks/main.yml
+@@ -57,7 +57,7 @@
+ 
+ - name: Verificant Paperera P
+   file:
+-        path: /srv/exports/Paperera/P
++        path: /srv/exports/Paperera/Paperera_Unitat_P
+         state: directory
+         owner: root
+         group: root
+@@ -65,7 +65,7 @@
+ 
+ - name: Verificant Paperera S
+   file:
+-        path: /srv/exports/Paperera/S
++        path: /srv/exports/Paperera/Paperera_Unitat_S
+         state: directory
+         owner: root
+         group: root
+@@ -73,7 +73,7 @@
+ 
+ - name: Verificant Paperera T
+   file:
+-        path: /srv/exports/Paperera/T
++        path: /srv/exports/Paperera/Paperera_Unitat_T
+         state: directory
+         owner: root
+         group: root
+@@ -81,7 +81,7 @@
+ 
+ - name: Verificant Paperera M
+   file:
+-        path: /srv/exports/Paperera/M
++        path: /srv/exports/Paperera/Paperera_Unitat_M
+         state: directory
+         owner: root
+         group: root
+@@ -89,7 +89,15 @@
+ 
+ - name: Verificant Paperera G
+   file:
+-        path: /srv/exports/Paperera/G
++        path: /srv/exports/Paperera/Paperera_Unitat_G
++        state: directory
++        owner: root
++        group: root
++        mode: 0770
++
++- name: Verificant Quarantine
++  file:
++        path: /var/quarantine
+         state: directory
+         owner: root
+         group: root
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -208,9 +208,10 @@ sudo chmod -R +x /srv/exports/*
+ "$FILES_LINKAT"/nextcloud.sh
+ 
+ ## Onlyoffice
+-if [ -f /etc/nginx/conf.d/onlyoffice-documentserver.conf ]; then
+-	sudo chattr -i /etc/nginx/conf.d/onlyoffice-documentserver.conf
+-fi
+-"$FILES_LINKAT"/onlyoffice.sh
+-ansible-playbook "$ANSIBLEPLAY"/onlyoffice.yml
+-chattr +i /etc/nginx/conf.d/onlyoffice-documentserver.conf
++#if [ -f /etc/nginx/conf.d/onlyoffice-documentserver.conf ]; then
++#	sudo chattr -i /etc/nginx/conf.d/onlyoffice-documentserver.conf
++#fi
++#"$FILES_LINKAT"/onlyoffice.sh
++#ansible-playbook "$ANSIBLEPLAY"/onlyoffice.yml
++#chattr +i /etc/nginx/conf.d/onlyoffice-documentserver.conf
++
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/nextcloud.sh
++++ linkat-servidor-18.04/linkat-servidor/plantilles/nextcloud.sh
+@@ -4,28 +4,30 @@ nextcloud.manual-install lnadmin __PASSL
+ sudo nextcloud.enable-https self-signed
+ sudo snap set nextcloud ports.http=81
+ sudo snap set nextcloud ports.https=10443
++sudo nextcloud.occ config:system:set trusted_domains 1 --value="__IP__"
++sudo nextcloud.occ config:system:set trusted_domains 2 --value="__NAME__.__DOMAIN__"
+ sudo snap run nextcloud.occ app:install user_ldap
+ sudo snap run nextcloud.occ app:enable user_ldap
+ sudo nextcloud.occ config:app:set user_ldap ldapAgentName --value="dc=__DOMAIN__"
+ sudo nextcloud.occ config:app:set user_ldap ldapBase --value="dc=__DOMAIN__"
+-sudo nextcloud.occ config:app:set ldap_agent_password --value="__PASSROOT__"
++sudo nextcloud.occ config:app:set user_ldap ldap_agent_password --value="__PASSROOT__"
+ sudo nextcloud.occ config:app:set user_ldap ldap_base --value="dc=__DOMAIN__"
+ sudo nextcloud.occ config:app:set user_ldap ldap_base_groups --value="dc=__DOMAIN__"
+ sudo nextcloud.occ config:app:set user_ldap ldap_base_users --value="dc=__DOMAIN__"
+-sudo nextcloud.occ config:app:set ldap_configuration_active --value="1"
+-sudo nextcloud.occ config:app:set ldap_display_name --value="cn"
+-sudo nextcloud.occ config:app:set ldap_dn --value="cn=admin,dc=__DOMAIN__"
+-sudo nextcloud.occ config:app:set ldap_group_filter --value="(&(|(objectclass=posixGroup)))"
+-sudo nextcloud.occ config:app:set ldap_group_member_assoc_attribute --value="gidNumber"
+-sudo nextcloud.occ config:app:set ldap_groupfilter_objectclass --value="posixGroup"
+-sudo nextcloud.occ config:app:set ldap_host --value="localhost"
+-sudo nextcloud.occ config:app:set ldap_login_filter --value="(&(|(objectclass=inetOrgPerson)(objectclass=organizationalPerson)(objectclass=person))(|(cn=%uid)(gidNumber=%uid)(homeDirectory=%uid)(loginShell=%uid)))"
+-sudo nextcloud.occ config:app:set ldap_loginfilter_attributes --value="cn\ngidNumber\nhomeDirectory\nloginShell"
+-sudo nextcloud.occ config:app:set ldap_port --value="389"
+-sudo nextcloud.occ config:app:set ldap_tls --value="0"
+-sudo nextcloud.occ config:app:set ldap_userfilter_objectclass --value="inetOrgPerson\norganizationalPerson\nperson"
+-sudo nextcloud.occ config:app:set ldap_userlist_filter --value="(|(objectclass=inetOrgPerson)(objectclass=organizationalPerson)(objectclass=person))"
+-sudo nextcloud.occ config:app:set types --value="authentication"
++sudo nextcloud.occ config:app:set user_ldap ldap_configuration_active --value="1"
++sudo nextcloud.occ config:app:set user_ldap ldap_display_name --value="cn"
++sudo nextcloud.occ config:app:set user_ldap ldap_dn --value="cn=admin,dc=__DOMAIN__"
++sudo nextcloud.occ config:app:set user_ldap ldap_group_filter --value="(&(|(objectclass=posixGroup)))"
++sudo nextcloud.occ config:app:set user_ldap ldap_group_member_assoc_attribute --value="gidNumber"
++sudo nextcloud.occ config:app:set user_ldap ldap_groupfilter_objectclass --value="posixGroup"
++sudo nextcloud.occ config:app:set user_ldap ldap_host --value="localhost"
++sudo nextcloud.occ config:app:set user_ldap ldap_login_filter --value="(&(|(objectclass=inetOrgPerson)(objectclass=organizationalPerson)(objectclass=person))(|(cn=%uid)(gidNumber=%uid)(homeDirectory=%uid)(loginShell=%uid)))"
++sudo nextcloud.occ config:app:set user_ldap ldap_loginfilter_attributes --value="cn\ngidNumber\nhomeDirectory\nloginShell"
++sudo nextcloud.occ config:app:set user_ldap ldap_port --value="389"
++sudo nextcloud.occ config:app:set user_ldap ldap_tls --value="0"
++sudo nextcloud.occ config:app:set user_ldap ldap_userfilter_objectclass --value="inetOrgPerson\norganizationalPerson\nperson"
++sudo nextcloud.occ config:app:set user_ldap ldap_userlist_filter --value="(|(objectclass=inetOrgPerson)(objectclass=organizationalPerson)(objectclass=person))"
++sudo nextcloud.occ config:app:set user_ldap types --value="authentication"
+ sudo nextcloud.occ app:install onlyoffice
+ sudo nextcloud.occ app:enable onlyoffice
+ sudo nextcloud.occ config:app:set onlyoffice DocumentServerUrl --value="https://__IP__:10445/"
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/onlyoffice-documentserver.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/onlyoffice-documentserver.conf
+@@ -33,8 +33,8 @@ server {
+   ## Strong SSL Security
+   ## https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
+   ssl on;
+-  ssl_certificate /etc/apache2/ssl/owncloud-server.crt;
+-  ssl_certificate_key /etc/apache2/ssl/owncloud-server.key;
++  ssl_certificate /etc/ssl/onlyoffice/onlyoffice.crt;
++  ssl_certificate_key /etc/ssl/onlyoffice/onlyoffice.key;
+   ssl_verify_client off;
+ 
+   ssl_ciphers "ECDHE-RSA-AES128-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA128:DHE-RSA-AES128-GCM-SHA384:DHE-RSA-AES128-GCM-SHA128:ECDHE-RSA-AES128-SHA384:ECDHE-RSA-AES128-SHA128:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA128:DHE-RSA-AES128-SHA128:DHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA384:AES128-GCM-SHA128:AES128-SHA128:AES128-SHA128:AES128-SHA:AES128-SHA:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4";
