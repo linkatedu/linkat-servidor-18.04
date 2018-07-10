@@ -1,0 +1,56 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-16) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-08-21
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/smb/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/smb/tasks/main.yml
+@@ -30,7 +30,7 @@
+         path: /etc/samba/smb.conf.d/
+         owner: root
+         group: root
+-        mode: 0644
++        mode: 00655
+ 
+ - name: Activant servei SAMBA smbd
+   service: name=smbd state=started enabled=yes
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/smb-ldap.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/smb-ldap.conf
+@@ -1,7 +1,7 @@
+         passdb backend = ldapsam:"ldap://localhost/"
+         obey pam restrictions = no
+         ldap ssl = off
+-        ldap admin dn = cn=admin,dc=__DOMINI__
++        ldap admin dn = cn=admin,dc=__DOMAIN__
+         ldap delete dn = no
+ 
+         ## Sync UNIX password with Samba password
+@@ -13,7 +13,7 @@
+         ;passwd program = /usr/sbin/smbldap-passwd -u '%u'
+         ;passwd chat = "Changing *\nNew password*" %n\n "*Retype new password*" %n\n"
+ 
+-        ldap suffix = dc=__DOMINI__
++        ldap suffix = dc=__DOMAIN__
+         ldap user suffix = ou=people
+         ldap group suffix = ou=group
+         ldap machine suffix = ou=Machines
