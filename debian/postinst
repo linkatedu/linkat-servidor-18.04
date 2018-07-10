@@ -2,3 +2,12 @@
 
 chmod 750 /etc/linkat/linkat-servidor/
 chmod 750 /usr/share/linkat/linkat-servidor/
+
+#Patches linkat-servidor
+if [ -f /etc/modalitat_linkat ] ; then
+        egrep servidor /etc/modalitat_linkat > /dev/null 2>&1
+        if [ $? -eq 0 ] ; then
+                /etc/linkat/linkat-servidor/patches/patches.sh
+        fi
+fi
+

@@ -1,4 +1,5 @@
 linkat-servidor	usr/share/linkat/
 linkat-servidor.conf	etc/linkat/linkat-servidor/
+patches                 etc/linkat/linkat-servidor/
 linkat-servidor.desktop	usr/share/applications/
 linkat-servidor.png	usr/share/pixmaps/
