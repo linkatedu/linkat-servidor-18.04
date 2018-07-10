@@ -1,0 +1,140 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-97) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2019-06-03
+
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/arxius.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/arxius.conf
+@@ -7,11 +7,11 @@
+    guest ok = No
+    printable = no
+    write ok = true
+-   force create mode = 664
+-   force directory mode = 775
++   force create mode = 660
++   force directory mode = 770
+    force group = Professorat
+    valid users = @Professorat
+-   create mask = 664
++   create mask = 660
+    vfs objects = recycle
+    recycle:repository = /srv/exports/Paperera/Paperera_Unitat_arxius
+    recycle:exclude = *.tmp *.temp *.o
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/cloudprint.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/cloudprint.conf
+@@ -7,11 +7,11 @@
+    guest ok = No
+    printable = no
+    write ok = true
+-   force create mode = 664
+-   force directory mode = 775
++   force create mode = 660
++   force directory mode = 770
+    force group = Cloudprint
+    valid users = @Cloudprint
+-   create mask = 664
++   create mask = 660
+    vfs objects = recycle
+    recycle:repository = /srv/exports/Paperera/Paperera_Unitat_cloudprint
+    recycle:exclude = *.tmp *.temp *.o
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/gestio.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/gestio.conf
+@@ -7,11 +7,11 @@
+    guest ok = No
+    printable = no
+    write ok = true
+-   force create mode = 664
+-   force directory mode = 775
++   force create mode = 660
++   force directory mode = 770
+    force group = Gestio
+    valid users = @Gestio
+-   create mask = 664
++   create mask = 660
+    vfs objects = recycle
+    recycle:repository = /srv/exports/Paperera/Paperera_Unitat_G
+    recycle:exclude = *.tmp *.temp *.o
+@@ -28,11 +28,11 @@
+    guest ok = No
+    printable = no
+    write ok = true
+-   force create mode = 664
+-   force directory mode = 775
++   force create mode = 660
++   force directory mode = 770
+    force group = Gestio
+    valid users = @Gestio
+-   create mask = 664
++   create mask = 660
+    vfs objects = recycle
+    recycle:repository = /srv/exports/Paperera/Paperera_Unitat_G
+    recycle:exclude = *.tmp *.temp *.o
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/maquetes.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/maquetes.conf
+@@ -7,11 +7,11 @@
+    guest ok = No
+    printable = no
+    write ok = true
+-   force create mode = 664
+-   force directory mode = 775
++   force create mode = 660
++   force directory mode = 770
+    force group = Administradors 
+    valid users = @Administradors
+-   create mask = 664
++   create mask = 660
+ #   vfs objects = recycle
+ #   recycle:repository = /srv/exports/Paperera/Paperera_Unitat_maquetes
+ #   recycle:exclude = *.tmp *.temp *.o
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/professorat.conf
++++ linkat-servidor-18.04/linkat-servidor/plantilles/professorat.conf
+@@ -7,11 +7,11 @@
+    guest ok = No
+    printable = no
+    write ok = true
+-   force create mode = 664
+-   force directory mode = 775
++   force create mode = 660
++   force directory mode = 770
+    force group = Professorat
+    valid users = @Professorat
+-   create mask = 664
++   create mask = 660
+    vfs objects = recycle
+    recycle:repository = /srv/exports/Paperera/Paperera_Unitat_P
+    recycle:exclude = *.tmp *.temp *.o
+@@ -28,11 +28,11 @@
+    guest ok = No
+    printable = no
+    write ok = true
+-   force create mode = 664
+-   force directory mode = 775
++   force create mode = 660
++   force directory mode = 770
+    force group = Professorat
+    valid users = @Professorat
+-   create mask = 664
++   create mask = 660
+    vfs objects = recycle
+    recycle:repository = /srv/exports/Paperera/Paperera_Unitat_P
+    recycle:exclude = *.tmp *.temp *.o
