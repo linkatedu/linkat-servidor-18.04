@@ -1,0 +1,240 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-13) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-08-20
+
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/configurador/lnadmin.yml
+@@ -0,0 +1,9 @@
++---
++- name: lnadmin 
++  hosts: servidor
++  remote_user: anuser
++  become: yes
++  become_method: sudo
++
++  roles:
++    - lnadmin
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/lnadmin/tasks/main.yml
+@@ -0,0 +1,8 @@
++---
++- name: Verificant Escriptori LNADMIN
++  file:
++        path: /home/lnadmin/Escriptori
++        state: directory
++
++- name: Copiant LNADMIN
++  copy: src=files/Eines dest=/home/lnadmin/Escriptori/
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/server.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/server.yml
+@@ -11,5 +11,6 @@
+     - smb
+     - dlna
+     - webmin
++    - lnadmin
+ #    - clam_antivirus
+ #    - jclic
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/Eines/backintime-qt4-root.desktop
+@@ -0,0 +1,13 @@
++[Desktop Entry]
++Name=Back In Time (root)
++GenericName=Backup
++Exec=pkexec backintime-qt4
++Icon=document-save
++Terminal=false
++X-MultipleArgs=false
++Type=Application
++StartupNotify=true
++Categories=Qt;System;
++Comment=Simple backup system
++Comment[sl]=Enostaven sistem ustvarjanja varnostnih kopij
++Keywords=automatic;snapshot;restore;rsync;root;
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/Eines/clamtk.desktop
+@@ -0,0 +1,106 @@
++[Desktop Entry]
++Name=ClamTk
++GenericName=Virus Scanner
++GenericName[ar]=ماسح الفيروسات
++GenericName[ast]=Antivirus
++GenericName[az]=Virus axtarışı
++GenericName[bg]=Скенер за вируси
++GenericName[bs]=Virus Skener
++GenericName[ca]=Comprovador de virus
++GenericName[cs]=Antivirový program
++GenericName[da]=Virusscanneren
++GenericName[de]=Virensuche
++GenericName[el]=Ανιχνευτής ιών
++GenericName[en_AU]=Virus Scanner
++GenericName[en_CA]=Virus Scanner
++GenericName[en_GB]=Virus Scanner
++GenericName[es]=Analizador de Virus
++GenericName[fi]=Virustorjuntasovellus
++GenericName[fo]=Virus skannari
++GenericName[fr]=Module de recherche et analyse de virus
++GenericName[gl]=Analizador de virus
++GenericName[he]=סורק וירוסים
++GenericName[hr]=Skener virusa
++GenericName[hu]=Víruskereső
++GenericName[id]=Pemindai Virus
++GenericName[it]=Analizzatore virus
++GenericName[ja]=ウイルススキャナ
++GenericName[ko]=바이러스 검사기
++GenericName[lt]=Virusų suradimo programa
++GenericName[mr]=धमक्या साठी स्कॅन
++GenericName[ms]=Pengimbas Virus
++GenericName[nb]=Virusskanner
++GenericName[nl]=Virusscanner
++GenericName[nl_BE]=Virusscanner
++GenericName[nn]=Virusskannar
++GenericName[pl]=Skaner wirusów
++GenericName[pt]=Verificador de vírus
++GenericName[pt_BR]=Antivírus Escaner
++GenericName[ro]=Scaner pentru viruși
++GenericName[ru]=Проверка на вирусы
++GenericName[sk]=Antivírus
++GenericName[sl]=Virusni pregledovalec
++GenericName[sr@latin]=Virus Skener
++GenericName[sv]=Virusskanner
++GenericName[te]=వైరస్ స్కానర్
++GenericName[th]=โปรแกรมตรวจจับไวรัส
++GenericName[tr]=Virüs Tarayıcı
++GenericName[ug]=ۋﻯﺭۇﺱ ﺕەﻚﺷۈﺭگۈچ
++GenericName[uk]=Антивірусний сканер
++GenericName[uz]=Вирусларни текшириш
++GenericName[zh_CN]=病毒扫描工具
++GenericName[zh_TW]=病毒掃描程式
++Comment=Scan for threats...
++Comment[ar]=إمسح للكشف عن الفيروسات
++Comment[ast]=Buscar amenaces...
++Comment[az]=Təhlükə mövcudluğuna yoxla...
++Comment[bg]=Проверка за наличие на заплахи ...
++Comment[bs]=Pretraga za virusima...
++Comment[cs]=Skenování hrozeb...
++Comment[da]=Skan for virus...
++Comment[de]=Auf Bedrohungen untersuchen…
++Comment[el]=Έλεγχος για ιούς...
++Comment[en]=Scan for threats...
++Comment[en_AU]=Scan for threats...
++Comment[en_CA]=Scan for threats...
++Comment[en_GB]=Scan for threats...
++Comment[es]=Analizar en busca de amenazas…
++Comment[fi]=Tarkista uhkien varalta...
++Comment[fo]=Skanna eftir virus...
++Comment[fr]=Rechercher des menaces...
++Comment[gl]=Buscar ameazas...
++Comment[he]=סריקה לאיתור איומים…
++Comment[hr]=Pretraživanje virusa...
++Comment[hu]=Vírusok keresése...
++Comment[id]=Pindai untuk ancaman...
++Comment[it]=Analizza per la ricerca di minacce...
++Comment[ja]=ウィルスをスキャンします...
++Comment[ko]=위험 요소를 검사합니다...
++Comment[ms]=Imbas jika ada ancaman...
++Comment[nl]=Scannen op virussen…
++Comment[nb]=Skann etter virus...
++Comment[nn]=Skann...
++Comment[pl]=Przeskanuj pliki w poszukiwaniu wirusów...
++Comment[pt]=A analizar ameaças...
++Comment[pt_BR]=Verificar se há vírus...
++Comment[ro]=Scanare pentru amenințări...
++Comment[ru]=Проверка на наличие угроз...
++Comment[sk]=Skenovanie hrozieb...
++Comment[sl]=Preglej za virusi...
++Comment[sr@latin]=Skeniranje pretnji...
++Comment[sv]=Skanna efter virus...
++Comment[te]=వైరస్సుల కోసం సంశోధిస్తున్నది...
++Comment[tr]=Virüs taraması yap...
++Comment[ug]=ۋىرۇس تەكشۈر…
++Comment[uk]=Шукати загрози…
++Comment[uz]=Хавф учун текшириш...
++Comment[zh_CN]=扫描威胁...
++Comment[zh_TW]=掃描威脅...
++TryExec=clamtk
++Exec=clamtk %F
++Icon=clamtk
++Type=Application
++Terminal=false
++Categories=GTK;GNOME;Utility;
++StartupNotify=true
++Keywords=antivirus;virus;malware;scan;scanner;
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/Eines/minidlna_refresh.desktop
+@@ -0,0 +1,14 @@
++[Desktop Entry]
++Version=1.0
++Name=Refresc del minidlna
++GenericName=Minidlna refresh
++X-GNOME-FullName=Minidlna refresh
++Comment=Script per refrescar el contingut multimedia MiniDLNA
++Type=Application
++Categories=Application;Development;Utility;
++Exec=/etc/Linkat/linkat-minidlna/minidlna_refresh.sh
++TryExec=/etc/Linkat/linkat-minidlna/minidlna_refresh.sh
++Terminal=false
++StartupNotify=true
++Icon=/usr/share/pixmaps/minidlna_refresh.png
++Name[ca]=Refresc del miniDLNA
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/Eines/system-config-printer.desktop
+@@ -0,0 +1,17 @@
++[Desktop Entry]
++Name=Printers
++GenericName=Printers
++X-GNOME-FullName=Printers
++Comment=Configure printers
++Exec=system-config-printer
++Terminal=false
++Type=Application
++Icon=printer
++StartupNotify=true
++NotShowIn=KDE;GNOME;
++X-Ubuntu-Gettext-Domain=system-config-printer
++Categories=GNOME;GTK;Settings;HardwareSettings;X-GNOME-Settings-Panel;X-Unity-Settings-Panel;System;Printing;
++X-GNOME-Settings-Panel=printing
++X-Unity-Settings-Panel=printing
++Keywords=Printer;Queue;Print;Paper;Ink;Toner;
++X-Desktop-File-Install-Version=0.23
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/Eines/usuaris.desktop
+@@ -0,0 +1,18 @@
++[Desktop Entry]
++Version=1.0
++Encoding=UTF-8
++Name=User's management LDAP
++Name[ca]=Gestió d'Usuaris LDAP
++Name[es]=Gestión de Usuarios LDAP
++Name[en]=User's management LDAP
++Comment=Gestió d'usuaris del servidor LDAP Linkat
++Exec=xdg-open https://localhost:10000
++Terminal=false
++Type=Application
++Icon=/usr/share/webmin/images/smalllogo.gif
++Categories=Settings;System;SystemSetup;
++StartupNotify=true
++GenericName[ca]=Gestió d'Usuaris LDAP
++GenericName[es]=Gestión de Usuarios LDAP
++GenericName[en]=User's management LDAP
++GenericName[ca_ES]=Gestió d'Usuaris LDAP
