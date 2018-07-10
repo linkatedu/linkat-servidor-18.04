@@ -1,0 +1,223 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ linkat-servidor (18.04-47) bionic; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: Pablo Vigo <pvigo@xtec.cat>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2018-11-08
+
+--- linkat-servidor-18.04.orig/linkat-servidor/configurador/roles/unitats/tasks/main.yml
++++ linkat-servidor-18.04/linkat-servidor/configurador/roles/unitats/tasks/main.yml
+@@ -5,7 +5,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 0555
++        mode: 00555
+ 
+ - name: Verificant unitat P
+   file:
+@@ -13,7 +13,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6770
++        mode: 06770
+ 
+ - name: Verificant unitats S
+   file:
+@@ -21,7 +21,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6775
++        mode: 06775
+ 
+ - name: Verificant unitats T
+   file:
+@@ -29,7 +29,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 0777
++        mode: 00777
+ 
+ - name: Verificant unitats M
+   file:
+@@ -37,7 +37,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6770
++        mode: 06770
+ 
+ - name: Verificant unitats G
+   file:
+@@ -45,7 +45,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6770
++        mode: 06770
+ 
+ - name: Verificant Paperera
+   file:
+@@ -53,7 +53,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6775
++        mode: 06775
+ 
+ - name: Verificant Paperera P
+   file:
+@@ -61,7 +61,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 0770
++        mode: 00770
+ 
+ #- name: Verificant Paperera S
+ #  file:
+@@ -77,7 +77,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 0775
++        mode: 00775
+ 
+ - name: Verificant Paperera M
+   file:
+@@ -85,7 +85,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 0770
++        mode: 00770
+ 
+ - name: Verificant Paperera G
+   file:
+@@ -93,7 +93,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 0770
++        mode: 00770
+ 
+ - name: Verificant Quarantine
+   file:
+@@ -101,7 +101,7 @@
+         state: directory
+         owner: clamav
+         group: root
+-        mode: 0770
++        mode: 00770
+ 
+ - name: Verificant unitat Arxius
+   file:
+@@ -109,7 +109,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6775
++        mode: 06775
+ 
+ - name: Verificant unitat CloudPrint
+   file:
+@@ -117,7 +117,7 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6770
++        mode: 06770
+ 
+ - name: Verificant unitats Maquetes
+   file:
+@@ -125,5 +125,5 @@
+         state: directory
+         owner: root
+         group: root
+-        mode: 6770
++        mode: 06770
+ 
+--- linkat-servidor-18.04.orig/linkat-servidor/linkat-servidor.sh
++++ linkat-servidor-18.04/linkat-servidor/linkat-servidor.sh
+@@ -264,11 +264,9 @@ sudo "$FILES_LINKAT"/nextcloud.sh
+ #sudo "$FILES_LINKAT"/onlyoffice.sh
+ 
+ ## Eliminar Network-Manager
+-killall update-manager update-notifier 2>&1
+-dpkg -s network-manager-gnome > /dev/null 2>&1
+-if [ "$?" -eq 0 ]; then
+-       sudo apt purge network-manager-gnome network-manager -y
+-fi
++sudo systemctl stop NetworkManager.service
++sudo systemctl disable NetworkManager.service
++mv /lib/systemd/system/NetworkManager.service NetworkManager.service.ori
+ 
+ # Flag d'instal·lació
+ echo servidor > /etc/modalitat_linkat
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/calibre-server.service
+@@ -0,0 +1,12 @@
++[Unit]
++Description=calibre content server
++After=network.target
++
++[Service]
++Type=simple
++User=root
++Group=root
++ExecStart=/usr/bin/calibre-server --daemonize --max-opds-items=30 --max-opds-ungrouped-items=100 --port=8081  --log=/var/log/calibre.log --disable-auth /srv/exports/rebost
++
++[Install]
++WantedBy=multi-user.target
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/calibre-server.sh
+@@ -0,0 +1,5 @@
++#!/bin/bash
++
++sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.py | sudo python -c "import sys; main=lambda x:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main('/opt')"
++
++
+--- /dev/null
++++ linkat-servidor-18.04/linkat-servidor/plantilles/calibre-update
+@@ -0,0 +1 @@
++xvfb-run calibredb add /srv/exports/arxius/llibres/* --with-library /srv/exports/arxius/
+--- linkat-servidor-18.04.orig/linkat-servidor/plantilles/erase_trash
++++ linkat-servidor-18.04/linkat-servidor/plantilles/erase_trash
+@@ -1,12 +1,12 @@
+ #!/bin/bash
+ # Eliminem paperera
+-/usr/bin/find /srv/exports/Paperera/Paperera_Unitat_T/* -mtime +7 -exec rm -fr {} \; > /dev/null 2>&1
++/usr/bin/find /srv/exports/Paperera/Paperera_Unitat_T/* -mtime +15 -exec rm -fr {} \; > /dev/null 2>&1
+ 
+-/usr/bin/find /srv/exports/Paperera/Paperera_Unitat_M/* -mtime +7 -exec rm -fr {} \; > /dev/null 2>&1
++/usr/bin/find /srv/exports/Paperera/Paperera_Unitat_M/* -mtime +15 -exec rm -fr {} \; > /dev/null 2>&1
+ 
+-/usr/bin/find /srv/exports/Paperera/Paperera_Unitat_P/* -mtime +7 -exec rm -fr {} \; > /dev/null 2>&1
++/usr/bin/find /srv/exports/Paperera/Paperera_Unitat_P/* -mtime +15 -exec rm -fr {} \; > /dev/null 2>&1
+ 
+-/usr/bin/find /srv/exports/Paperera/Paperera_Unitat_G/* -mtime +7 -exec rm -fr {} \; > /dev/null 2>&1
++/usr/bin/find /srv/exports/Paperera/Paperera_Unitat_G/* -mtime +15 -exec rm -fr {} \; > /dev/null 2>&1
+ 
+ # Eliminem arxius infectats
+ /usr/bin/find /var/quarantine -mtime +7 -exec rm {} \; 2>&1
