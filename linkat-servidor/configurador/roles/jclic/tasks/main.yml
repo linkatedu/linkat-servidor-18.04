@@ -1,0 +1,9 @@
+---
+- name: Copiant fitxers de configuració Jclic 
+  copy: src=files/jclic.cfg dest=/usr/share/java/JClic/
+
+- file:
+        path: /usr/share/java/JClic/jclic.cfg
+        owner: root
+        group: root
+        mode: 0644

@@ -1,0 +1,18 @@
+---
+- name: Copiant fitxers accés web 
+  copy: src=files/index.html dest=/srv/app/servidorweb/
+
+- file:
+        path: /srv/app/servidorweb/index.html
+        owner: root
+        group: root
+        mode: 0644
+
+- name: Copiant Nextcloud script restart
+  copy: src=files/nextcloud-restart.sh dest=/usr/local/bin/
+
+- file:
+        path: /usr/local/bin/nextcloud-restart.sh
+        owner: lnadmin
+        group: root
+        mode: 0770
