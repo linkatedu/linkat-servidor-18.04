@@ -1,12 +1,10 @@
 $TTL 86400
 @   IN  SOA     __NAME__.__DOMAIN__. root.__DOMAIN__. (
-        2011071002  ;Serial
+        2018090101  ;Serial
         3600        ;Refresh
         1800        ;Retry
         604800      ;Expire
         86400       ;Minimum TTL
 )
-@       IN  NS          __NAME__.__DOMAIN__.
-@       IN  PTR         __DOMAIN__.
-__NAME__     IN  A           __IP__
+@       IN  NS          __NAME__.
 __IP4__     IN  PTR         __NAME__.__DOMAIN__.

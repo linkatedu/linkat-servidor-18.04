@@ -8,4 +8,4 @@ network:
       gateway4: __GW__
       nameservers:
           search: [__DOMAIN__, __NAME__.__DOMAIN__]
-          addresses: [__IP__, __DNS1__, __DNS2__]
+          addresses: [127.0.0.1, __DNS1__, __DNS2__]

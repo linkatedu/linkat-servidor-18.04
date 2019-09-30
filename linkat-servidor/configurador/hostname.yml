@@ -1,5 +1,5 @@
 ---
-- name: Servidor de centre
+- name: Nom de la màquina 
   hosts: servidor
   remote_user: anuser
   become: yes

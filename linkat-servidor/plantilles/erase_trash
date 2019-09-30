@@ -1,0 +1,8 @@
+#!/bin/bash
+# Eliminem paperera
+for PAPER in $(ls /srv/exports/Paperera); do 
+	/usr/bin/find /srv/exports/Paperera/$PAPER/* -mtime +7 -exec rm -fr {} \; > /dev/null 2>&1
+done
+
+# Eliminem arxius infectats
+/usr/bin/find /var/quarantine -mtime +7 -exec rm {} \; 2>&1

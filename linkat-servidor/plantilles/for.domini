@@ -1,6 +1,6 @@
 $TTL 86400
-@   IN  SOA     __NAME__.__DOMAIN__. root.__DOMAIN__. (
-        2011071001  ;Serial
+@   IN  SOA     __DOMAIN__. root.__DOMAIN__. (
+        2018090101  ;Serial
         3600        ;Refresh
         1800        ;Retry
         604800      ;Expire

@@ -9,11 +9,9 @@
     - unitats
     - nfs
     - smb
-#    - ldap
     - dlna
     - webmin
-#    - nextcloud
-#    - onlyoffice
-#    - permisos_unitats
-#    - clam_antivirus
-#    - jclic
+    - clamav
+    - docker
+    - jclic
+    - web

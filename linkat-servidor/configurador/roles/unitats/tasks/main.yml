@@ -5,7 +5,7 @@
         state: directory
         owner: root
         group: root
-        mode: 0555
+        mode: 00775
 
 - name: Verificant unitat P
   file:
@@ -13,7 +13,7 @@
         state: directory
         owner: root
         group: root
-        mode: 6770
+        mode: 06770
 
 - name: Verificant unitats S
   file:
@@ -21,7 +21,7 @@
         state: directory
         owner: root
         group: root
-        mode: 6775
+        mode: 06775
 
 - name: Verificant unitats T
   file:
@@ -29,7 +29,7 @@
         state: directory
         owner: root
         group: root
-        mode: 0777
+        mode: 00777
 
 - name: Verificant unitats M
   file:
@@ -37,7 +37,7 @@
         state: directory
         owner: root
         group: root
-        mode: 6770
+        mode: 06770
 
 - name: Verificant unitats G
   file:
@@ -45,7 +45,7 @@
         state: directory
         owner: root
         group: root
-        mode: 6770
+        mode: 06770
 
 - name: Verificant Paperera
   file:
@@ -53,44 +53,100 @@
         state: directory
         owner: root
         group: root
-        mode: 6775
+        mode: 02775
 
 - name: Verificant Paperera P
   file:
-        path: /srv/exports/Paperera/P
+        path: /srv/exports/Paperera/Paperera_Unitat_P
         state: directory
         owner: root
         group: root
-        mode: 0770
+        mode: 00770
 
-- name: Verificant Paperera S
-  file:
-        path: /srv/exports/Paperera/S
-        state: directory
-        owner: root
-        group: root
-        mode: 0644
+#- name: Verificant Paperera S
+#  file:
+#        path: /srv/exports/Paperera/Paperera_Unitat_S
+#        state: directory
+#        owner: root
+#        group: root
+#        mode: 00644
 
 - name: Verificant Paperera T
   file:
-        path: /srv/exports/Paperera/T
+        path: /srv/exports/Paperera/Paperera_Unitat_T
         state: directory
         owner: root
         group: root
-        mode: 0775
+        mode: 00775
 
 - name: Verificant Paperera M
   file:
-        path: /srv/exports/Paperera/M
+        path: /srv/exports/Paperera/Paperera_Unitat_M
         state: directory
         owner: root
         group: root
-        mode: 0770
+        mode: 00770
 
 - name: Verificant Paperera G
   file:
-        path: /srv/exports/Paperera/G
+        path: /srv/exports/Paperera/Paperera_Unitat_G
         state: directory
         owner: root
         group: root
-        mode: 0770
+        mode: 00770
+
+- name: Verificant Quarantine
+  file:
+        path: /var/quarantine
+        state: directory
+        owner: clamav
+        group: root
+        mode: 00770
+
+- name: Verificant unitat Arxius
+  file:
+        path: /srv/exports/arxius
+        state: directory
+        owner: lnadmin 
+        group: root
+        mode: 06770
+
+- name: Verificant unitat CloudPrint
+  file:
+        path: /srv/exports/cloudprint
+        state: directory
+        owner: root
+        group: root
+        mode: 06770
+
+- name: Verificant unitats Maquetes
+  file:
+        path: /srv/exports/maquetes
+        state: directory
+        owner: root
+        group: root
+        mode: 06770
+
+- name: Verificant unitats FOG 
+  file:
+        path: /srv/fog/images
+        state: directory
+        owner: 1000
+        group: root 
+        mode: 00770
+
+- name: Verificant unitats FOG
+  file:
+        path: /srv/fog/images/dev
+        state: directory
+        owner: 1000
+        group: root
+        mode: 00770
+
+- name: Unitats dades Docker
+  file:
+        path: /srv/app
+        state: directory
+        owner: root
+        group: root
+        mode: 00770

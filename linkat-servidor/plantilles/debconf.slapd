@@ -16,4 +16,4 @@ slapd	slapd/ppolicy_schema_needs_update	select	abort installation
 slapd	slapd/backend	select	MDB
 slapd	slapd/move_old_database	boolean	true
 # Desitjau que s'elimini la base de dades en purgar el paquet slapd?
-slapd	slapd/purge_database	boolean	false
+slapd	slapd/purge_database	boolean true	

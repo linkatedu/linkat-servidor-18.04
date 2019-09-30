@@ -41,6 +41,18 @@ check_ip()
 	fi
 }
 
+## Revisar connexió
+check_connexio()
+{
+	sudo hping3 -S google.com -p 443 -c 4
+	if [ $? -eq 0 ]; then
+		CONNEXIO="1"
+	else
+		echo -en "Error de connexió: Reviseu la configuració de xarxa"
+		exit 12
+	fi
+}
+
 ## Revisar contrasenya
 check_pass()
 {
@@ -53,13 +65,20 @@ check_pass()
                 yad --title="Error" --text="\nLa contrasenya de l'usuari $1 és buida." --image="dialog-error" --button="D'acord"
         	ERROR="1"
 	fi
+	
+	for passnum in "$2"; do
+		if [ ${#passnum} -lt 8 ]; then
+			yad --title="Error" --text="\nLa contrasenya de l'usuari $1 ha de contenir almenys 8 caràcters." --image="dialog-error" --button="D'acord"
+                	ERROR="1"
+		fi
+	done
 }
 
 ## Formulari de dades de configuracions del servidor de centre
 
 formulari()
 {
-res=$(yad --width=400 --title="Linkat Servidor de centre" --text="\nIntroduexi els valors per configurar el sevidor de centre\nTots els camps són obligatoris\n\nConfiguracions del servidor:\n" \
+res=$(yad --width=400 --title="Linkat Servidor de centre" --text="\nIntroduïu els valors per configurar el sevidor de centre.\nCal emplenar tots els camps.\n\nConfiguracions del servidor:\n" \
 --image="/usr/share/linkat/linkat-servidor/linkat-servidor-banner.png" \
 --form --item-separator=" " \
 --field="Nom del servidor" \
@@ -97,9 +116,18 @@ NEW_PASSLNADMIN1=$(echo "$res" | awk -F"|" '{print $11}')
 NEW_PASSLNADMIN2=$(echo "$res" | awk -F"|" '{print $12}')
 }
 
+check_errors()
+{
+if [ ! "$?" -eq 0 ]; then
+	echo -en "Error: $1"
+	yad --title="Error" --text="\nS'ha produit un error durant la instal·lacio de: $1.\nEl programa es tancara." --image="dialog-error" --button="D'acord"
+	exit 22
+fi
+}
+
 validar_formulari()
 {
-yad --width=400 --title="Linkat Servidor de centre" --text="\nSón correctes les dades següents?\n\nServidor: $NEW_NAME\nDomini: $NEW_DOMAIN\nDispositiu: $NEW_DEV\nIP: $NEW_IP\nMàscara: $NEW_MASK\nPassarel·la: $NEW_GW\nDNS Primària: $NEW_DNS1\nDNS Secundària: $NEW_DNS2" \
+yad --width=400 --title="Linkat Servidor de centre" --text="\nLes dades següents són correctes?\n\nServidor: $NEW_NAME\nDomini: $NEW_DOMAIN\nDispositiu: $NEW_DEV\nIP: $NEW_IP\nMàscara: $NEW_MASK\nPassarel·la: $NEW_GW\nDNS Primària: $NEW_DNS1\nDNS Secundària: $NEW_DNS2" \
 --image="/usr/share/linkat/linkat-servidor/linkat-servidor-banner.png" \
 --button="D'acord" --button="Cancel·la":11
 res1="$?"
@@ -113,7 +141,6 @@ while [ "$ERROR" -eq 1 ]; do
 	ERROR="0"
 	formulari
 	check_ip IP "$NEW_IP"
-#	check_ip Màscara "$NEW_MASK"
 	check_ip Passarel·la "$NEW_GW"
 	check_ip DNS "$NEW_DNS1"
   check_ip DNS "$NEW_DNS2"
@@ -179,7 +206,7 @@ echo -en "Aplicant configuracions...\n\n"
 killall update-manager update-notifier 2>&1
 
 ## Aplica nova configuració de xarxa
-cp -av "$FILES_LINKAT"/50-linkat-net-config.yaml /etc/netplan/
+cp -av "$FILES_LINKAT"/50-linkat-net-config.yaml /etc/netplan/ > /dev/null 2>&1
 netplan apply
 
 ## Repara el fitxer resolv.conf
@@ -192,12 +219,61 @@ ansible-playbook "$ANSIBLEPLAY"/dns.yml
 
 systemctl restart bind9.service
 
+## Revisa connexió
+check_connexio
+
+killall update-manager update-notifier > /dev/null 2>&1
+dpkg -s slapd > /dev/null 2>&1
+res="$?"
+if [ "$res" -eq 0 ]; then
+	sudo apt purge slapd ldap-auth-config auth-client-config -y
+fi
+
+## Aplicant Playbook LDAP
 ansible-playbook "$ANSIBLEPLAY"/ldap.yml
+
+## Aplicant Playbook servidor (webmin, lnadmin, etc)
 ansible-playbook "$ANSIBLEPLAY"/server.yml
 
 ## Configurant servidor LDAP
-#cd "$FILES_LINKAT"/
-#./ldap.sh
+cd "$FILES_LINKAT"/
+sudo "$FILES_LINKAT"/ldap.sh
+check_errors ldap
 
-## Aplicant Playbook permisos
-#ansible-playbook "$ANSIBLEPLAY"/permisos.yml
+sudo "$FILES_LINKAT"/ldap-auth.sh
+check_errors ldap-auth
+
+## Configuració servidor SAMBA
+ansible-playbook "$ANSIBLEPLAY"/smb.yml
+sudo "$FILES_LINKAT"/ldap-samba.sh
+check_errors ldap-samba
+sudo "$FILES_LINKAT"/smbldap-populate.sh
+check_errors populate
+
+## Copy Jclic Projects
+mv /usr/share/java/JClic/projects /srv/exports/S/jclic
+chown -R root:Administradors /srv/exports/S/jclic
+
+## Aplicant Playbook permisos i ACLs unitats
+ansible-playbook "$ANSIBLEPLAY"/permisos.yml
+ansible-playbook "$ANSIBLEPLAY"/acl.yml
+
+## Nextcloud
+sudo "$FILES_LINKAT"/nextcloud.sh
+
+## Desctivar NetworkManager
+sudo systemctl stop NetworkManager.service
+sudo systemctl disable NetworkManager.service
+if [ -f /lib/systemd/system/NetworkManager.service ]; then
+	mv /lib/systemd/system/NetworkManager.service /lib/systemd/system/NetworkManager.service.ori
+fi
+
+# Flag d'instal·lació
+echo servidor > /etc/modalitat_linkat
+
+yad --width=300 --title="Linkat Servidor de centre" --text="\nLa configuració ha estat aplicada.\n\nEl Servidor de centre s'ha de reiniciar per aplicar els canvis.\n\nVoleu reiniciar-lo ara?" \
+--image="/usr/share/linkat/linkat-servidor/linkat-servidor-banner.png" \
+--button="D'acord" --button="Cancel·la":11
+if [ $? -eq 0 ]; then
+	sudo shutdown -r now
+fi

@@ -1,24 +1,20 @@
-dn: ou=Machines,dc=__DOMAIN__
-objectClass: top
+dn: ou=Computers,dc=__DOMAIN__
 objectClass: organizationalUnit
-ou: Machines
+ou: Computers
 
 dn: ou=Idmap,dc=__DOMAIN__
-objectClass: top
 objectClass: organizationalUnit
 ou: Idmap
 
-dn: ou=group,dc=__DOMAIN__
-objectClass: top
+dn: ou=Groups,dc=__DOMAIN__
 objectClass: organizationalUnit
-ou: group
+ou: Groups
 
-dn: ou=people,dc=__DOMAIN__
-objectClass: top
+dn: ou=People,dc=__DOMAIN__
 objectClass: organizationalUnit
-ou: people
+ou: People
 
-dn: ou=ldapconfig,dc=__DOMAIN__
-objectClass: top
-objectClass: organizationalUnit
-ou: ldapconfig
+#dn: ou=ldapconfig,dc=__DOMAIN__
+#objectClass: top
+#objectClass: organizationalUnit
+#ou: ldapconfig

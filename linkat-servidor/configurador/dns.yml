@@ -1,5 +1,5 @@
 ---
-- name: Servidor de centre
+- name: Servidor DNS 
   hosts: servidor
   remote_user: anuser
   become: yes
