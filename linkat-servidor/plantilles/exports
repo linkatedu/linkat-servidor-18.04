@@ -1,0 +1,6 @@
+/home/	*(rw,no_root_squash,sync,no_subtree_check)
+/srv/exports/P *(rw,root_squash,sync,no_subtree_check)
+/srv/exports/M *(rw,root_squash,sync,no_subtree_check)
+/srv/exports/S *(rw,root_squash,sync,no_subtree_check)
+/srv/exports/G *(rw,root_squash,sync,no_subtree_check)
+/srv/exports/T *(rw,all_squash,sync,no_subtree_check)

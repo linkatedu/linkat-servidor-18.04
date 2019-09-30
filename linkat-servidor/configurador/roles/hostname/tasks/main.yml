@@ -1,0 +1,6 @@
+---
+- name: Aplicant el hostname
+  copy: src=files/hostname dest=/etc/hostname
+
+- name: Aplicant el hostname
+  copy: src=files/hosts dest=/etc/hosts

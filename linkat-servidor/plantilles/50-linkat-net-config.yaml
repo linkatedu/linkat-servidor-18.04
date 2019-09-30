@@ -1,0 +1,11 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    __DEV__:
+      addresses:
+        - __IP__/__MASK__
+      gateway4: __GW__
+      nameservers:
+          search: [__DOMAIN__, __NAME__.__DOMAIN__]
+          addresses: [__IP__, __DNS1__, __DNS2__]

@@ -1,0 +1,13 @@
+---
+- name: Copiant fitxers de configuració NFS
+  copy: src=files/exports dest=/etc/exports
+
+- file:
+        path: /etc/exports
+        owner: root
+        group: root
+        mode: 0644
+
+#- name: Activant servei NFS
+#  service: name=nfs-server state=started enabled=yes
+#  notify: restart nfs-server

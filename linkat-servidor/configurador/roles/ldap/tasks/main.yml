@@ -1,0 +1,68 @@
+---
+- name: Aplicant la configuració del paquet slapd
+  command: debconf-set-selections /usr/share/linkat/linkat-servidor/configurador/files/debconf.slapd
+
+- name: Aplicant la configuració del paquet ldap-auth-config
+  command: debconf-set-selections /usr/share/linkat/linkat-servidor/configurador/files/debconf.ldap-auth-config
+
+- name: Instal·lant el paquet slapd
+  apt: pkg={{ item }} state=present update_cache=yes
+  with_items:
+  - slapd
+  - ldap-utils
+  - ldap-auth-config
+
+- name: Copiant fitxers de configuració LDAP
+  copy: src=files/80-linkat-server-lightdm.conf dest=/usr/share/lightdm/lightdm.conf.d/80-linkat-server-lightdm.conf
+
+- name: Copiant fitxers de configuració LDAP
+  copy: src=files/ca.info dest=/etc/ssl/ca.info
+
+- name: Copiant fitxers de configuració LDAP
+  copy: src=files/servidor.info dest=/etc/ssl/servidor.info
+
+- name: Copiant fitxers de configuració LDAP
+  copy: src=files/create-home-ldap-users dest=/usr/share/pam-configs/create-home-ldap-users
+
+- name: Copiant fitxers de configuració LDAP
+  copy: src=files/linkat-grups dest=/usr/share/pam-configs/linkat-grups
+
+- name: Copiant fitxers de configuració LDAP client
+  copy: src=files/ldap.conf dest=/etc/ldap.conf
+
+- name: Copiant fitxers de configuració LDAP client
+  copy: src=files/libnss-ldap.conf dest=/etc/libnss-ldap.conf
+
+- file:
+        path: /usr/share/lightdm/lightdm.conf.d/80-linkat-server-lightdm.conf
+        owner: root
+        group: root
+        mode: 0644
+
+- file:
+        path: /etc/ssl/ca.info
+        owner: root
+        group: root
+        mode: 0644
+
+- file:
+        path: /etc/ssl/servidor.info
+        owner: root
+        group: root
+        mode: 0644
+
+- file:
+        path: /usr/share/pam-configs/create-home-ldap-users
+        owner: root
+        group: root
+        mode: 0644
+
+- file:
+        path: /usr/share/pam-configs/linkat-grups
+        owner: root
+        group: root
+        mode: 0644
+
+- name: Activant servei LDAP
+  service: name=slapd state=started enabled=yes
+  notify: restart slapd

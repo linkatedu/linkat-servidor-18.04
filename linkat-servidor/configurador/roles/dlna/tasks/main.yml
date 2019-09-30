@@ -1,0 +1,13 @@
+---
+- name: Copiant fitxers de configuració miniDLNA 
+  copy: src=files/minidlna.conf dest=/etc/minidlna.conf
+
+- file:
+        path: /etc/minidlna.conf
+        owner: root
+        group: root
+        mode: 0644
+
+- name: Activant servei miniDLNA
+  service: name=minidlna state=started enabled=yes
+  notify: restart minidlna

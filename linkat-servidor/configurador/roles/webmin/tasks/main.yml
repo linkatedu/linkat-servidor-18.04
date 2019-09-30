@@ -1,0 +1,31 @@
+---
+- name: Copiant fitxers de configuració WEBMIN
+  copy: src=files/config dest=/etc/webmin/
+
+- name: Copiant fitxers de configuració WEBMIN
+  copy: src=files/miniserv.users dest=/etc/webmin/
+
+- name: Copiant fitxers de configuració WEBMIN
+  copy: src=files/webmin.acl dest=/etc/webmin/
+
+- file:
+        path: /etc/webmin/config
+        owner: root
+        group: root
+        mode: 0644
+
+- file:
+        path: /etc/webmin/miniserv.users
+        owner: root
+        group: root
+        mode: 0600
+
+- file:
+        path: /etc/webmin/webmin.acl
+        owner: root
+        group: root
+        mode: 0600
+
+- name: Activant servei WEBMIN
+  service: name=webmin state=started enabled=yes
+  notify: restart webmin

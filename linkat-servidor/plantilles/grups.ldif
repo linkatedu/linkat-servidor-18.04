@@ -1,0 +1,41 @@
+dn: cn=Administradors,ou=group,dc=__DOMAIN__
+cn: Administradors
+gidNumber: 10000
+objectClass: top
+#objectClass: namedObject
+objectClass: posixGroup
+
+dn: cn=Professorat,ou=group,dc=__DOMAIN__
+cn: Professorat
+gidNumber: 10001
+objectClass: top
+#objectClass: namedObject
+objectClass: posixGroup
+
+dn: cn=Editors,ou=group,dc=__DOMAIN__
+cn: Editors
+gidNumber: 10002
+objectClass: top
+#objectClass: namedObject
+objectClass: posixGroup
+
+dn: cn=Alumnat,ou=group,dc=__DOMAIN__
+cn: Alumnat
+gidNumber: 10003
+objectClass: top
+#objectClass: namedObject
+objectClass: posixGroup
+
+dn: cn=Gestio,ou=group,dc=__DOMAIN__
+cn: Gestio
+gidNumber: 10004
+objectClass: top
+#objectClass: namedObject
+objectClass: posixGroup
+
+dn: cn=users,ou=group,dc=__DOMAIN__
+cn: users
+gidNumber: 100
+objectClass: top
+#objectClass: namedObject
+objectClass: posixGroup
