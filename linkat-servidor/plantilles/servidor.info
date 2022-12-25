@@ -1,0 +1,6 @@
+organization = __DOMAIN__ 
+cn = __NAME__.__DOMAIN__
+tls_www_server
+encryption_key
+signing_key
+expiration_days = 36500

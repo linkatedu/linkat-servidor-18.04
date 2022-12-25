@@ -1,0 +1,9 @@
+---
+- name: Permisos unitats compartides 
+  hosts: servidor
+  remote_user: anuser
+  become: yes
+  become_method: sudo
+
+  roles:
+    - permisos

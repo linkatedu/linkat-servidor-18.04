@@ -1,0 +1,22 @@
+---
+- name: Copiant fitxers de configuració DNS
+  copy: src=files/named.conf.options dest=/etc/bind/named.conf.options
+
+- name: Copiant fitxers de configuració DNS
+  copy: src=files/named.conf.local dest=/etc/bind/named.conf.local
+
+- name: Copiant fitxers de configuració DNS
+  copy: src=files/for.domini dest=/etc/bind/for.domini
+
+- name: Copiant fitxers de configuració DNS
+  copy: src=files/rev.domini dest=/etc/bind/rev.domini
+
+- file:
+        path: /etc/bind/
+        owner: bind
+        group: bind
+        mode: 0755
+
+- name: Activant servei DNS
+  service: name=bind9 state=started enabled=yes
+  notify: reload bind9

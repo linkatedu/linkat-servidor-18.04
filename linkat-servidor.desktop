@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Linkat servidor
+Icon=linkat-servidor
+Exec=sudo /usr/share/linkat/linkat-servidor/linkat-servidor.install
+Terminal=true
+Type=Application
+StartupNotify=true
+Categories=GNOME;GTK;Linkat;System;
+Keywords=Preferences;Settings;

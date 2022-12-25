@@ -1,0 +1,20 @@
+dn: ou=Computers,dc=__DOMAIN__
+objectClass: organizationalUnit
+ou: Computers
+
+dn: ou=Idmap,dc=__DOMAIN__
+objectClass: organizationalUnit
+ou: Idmap
+
+dn: ou=Groups,dc=__DOMAIN__
+objectClass: organizationalUnit
+ou: Groups
+
+dn: ou=People,dc=__DOMAIN__
+objectClass: organizationalUnit
+ou: People
+
+#dn: ou=ldapconfig,dc=__DOMAIN__
+#objectClass: top
+#objectClass: organizationalUnit
+#ou: ldapconfig

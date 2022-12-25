@@ -1,0 +1,167 @@
+---
+- name: Verificant permisos unitats
+  file:
+        path: /srv/exports
+        state: directory
+        owner: root
+        group: root
+        mode: 00775
+
+- name: Verificant unitat P
+  file:
+        path: /srv/exports/P
+        state: directory
+        owner: root
+        group: Professorat 
+        mode: 02770
+        recurse: yes
+
+- name: Verificant unitats S
+  file:
+        path: /srv/exports/S
+        state: directory
+        owner: root
+        group: Administradors
+        mode: 02775
+        recurse: yes
+
+- name: Verificant unitats T
+  file:
+        path: /srv/exports/T
+        state: directory
+        owner: nobody
+        group: Administradors
+        mode: 00777
+        recurse: yes
+
+- name: Verificant unitats M
+  file:
+        path: /srv/exports/M
+        state: directory
+        owner: root
+        group: Professorat
+        mode: 02770 
+        recurse: yes
+
+- name: Verificant unitats G
+  file:
+        path: /srv/exports/G
+        state: directory
+        owner: root
+        group: Gestio
+        mode: 02770
+        recurse: yes
+
+- name: Verificant Paperera
+  file:
+        path: /srv/exports/Paperera
+        state: directory
+        owner: root
+        group: Administradors
+        mode: 02775
+
+- name: Verificant Paperera P
+  file:
+        path: /srv/exports/Paperera/Paperera_Unitat_P
+        state: directory
+        owner: root
+        group: Professorat
+        mode: 02770
+        recurse: yes
+
+#- name: Verificant Paperera S
+#  file:
+#        path: /srv/exports/Paperera/Paperera_Unitat_S
+#        state: directory
+#        owner: root
+#        group: Administradors
+#        mode: 00644
+#        recurse: yes
+
+- name: Verificant Paperera T
+  file:
+        path: /srv/exports/Paperera/Paperera_Unitat_T
+        state: directory
+        owner: nobody
+        group: Administradors
+        mode: 00777
+        recurse: yes
+
+- name: Verificant Paperera M
+  file:
+        path: /srv/exports/Paperera/Paperera_Unitat_M
+        state: directory
+        owner: root
+        group: Professorat
+        mode: 02770
+        recurse: yes
+
+- name: Verificant Paperera G
+  file:
+        path: /srv/exports/Paperera/Paperera_Unitat_G
+        state: directory
+        owner: root
+        group: Gestio
+        mode: 02770
+        recurse: yes
+
+- name: Verificant unitat Arxius
+  file:
+        path: /srv/exports/arxius
+        state: directory
+        owner: root
+        group: Professorat
+        mode: 02770
+        recurse: yes
+
+- name: Verificant unitat CloudPrint
+  file:
+        path: /srv/exports/cloudprint
+        state: directory
+        owner: root
+        group: Cloudprint
+        mode: 02770
+        recurse: yes
+
+- name: Verificant unitats Maquetes
+  file:
+        path: /srv/exports/maquetes
+        state: directory
+        owner: root
+        group: Administradors
+        mode: 02770
+        recurse: yes
+
+- name: Verificant unitat Paperera Arxius
+  file:
+        path: /srv/exports/Paperera/Paperera_Unitat_arxius
+        state: directory
+        owner: root
+        group: Professorat
+        mode: 02770
+        recurse: yes
+
+- name: Verificant unitat Paperera cloudprint
+  file:
+        path: /srv/exports/Paperera/Paperera_Unitat_cloudprint
+        state: directory
+        owner: root
+        group: Cloudprint
+        mode: 02770
+        recurse: yes
+
+#- name: Verificant unitats Paperera maquetes
+#  file:
+#path: /srv/exports/Paperera/Paperera_Unitat_maquetes
+#state: directory
+#owner: root
+#group: Administradors
+#mode: 06770
+
+- name: Verificant unitat remmount
+  file:
+        path: /etc/remmount.d
+        state: directory
+        owner: lnadmin
+        group: root
+        mode: 00770

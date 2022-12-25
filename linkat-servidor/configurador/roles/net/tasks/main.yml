@@ -1,0 +1,9 @@
+---
+- name: Copiant configuració de xarxa
+  copy: src=files/50-linkat-net-config.yaml dest=/etc/netplan/
+
+- name: Aplicant la configuració de xarxa
+  command: /usr/sbin/netplan apply
+
+- name: Copiant configuració de xarxa
+  copy: src=files/resolv.conf dest=/etc/

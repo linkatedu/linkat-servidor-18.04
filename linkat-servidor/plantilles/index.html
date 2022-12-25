@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin-top: 50px;
+    background-color: orange;
+    padding: 20px;
+    font-family: Arial;
+    color: #101010;
+}
+
+/* Center website */
+.main {
+    max-width: 1320px;
+    margin: auto;
+}
+
+h1 {
+    font-size: 50px;
+    word-break: break-all;
+    color: white;
+}
+
+.row {
+    margin: 10px -16px;
+}
+
+/* Add padding BETWEEN each col */
+.row,
+.col-sm-6, .col-md-6, .col-lg-4, .col-xl-4 {
+    padding: 8px;
+    padding-top: 10px;
+    padding-bottom: 40px;
+}
+
+/* Create three equal cols that floats next to each other */
+.col {
+    float: left;
+    width: 33.33%;
+    display: none; /* Hide all elements by default */
+}
+
+/* Clear floats after rows */ 
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Content */
+.content {
+    background-color: white;
+    padding: 10px;
+}
+
+/* The "show" class is added to the filtered elements */
+.show {
+  display: block;
+}
+
+/* Style the buttons */
+.btn {
+  border: none;
+  outline: none;
+  padding: 6px 16px ;
+  background-color: orange;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #ddd;
+}
+
+.btn.active {
+  background-color: white;
+  /*color: white; */
+}
+
+.image { 
+ width:200px;
+  height:100px;
+  margin-top:20px;
+ }
+
+.card {
+  width:300px; 
+}
+
+/* Style the tab */
+.tab {
+    float: left;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    width: 30%;
+    height: 200px;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+    display: block;
+    background-color: inherit;
+    color: black;
+    padding: 22px 16px;
+    width: 100%;
+    border: none;
+    outline: none;
+    text-align: left;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+    background-color: #ddd;
+    height: 200px;
+}
+
+/* Create an active/current "tab button" class */
+.tab button.active {
+    background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+    float: left;
+    padding: 0px 12px;
+    border: 1px solid #ccc;
+    width: 70%;
+    border-left: none;
+    /*height: 300px; */
+}
+
+.flip-card {
+  background-color: transparent;
+  width: 300px;
+  height: 125px;
+  perspective: 1000px;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
+
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.flip-card-front {
+  background-color: #9d9c97;
+  color: black;
+}
+
+.flip-card-back {
+  background-color: #9d9c97;
+  color: white;
+  transform: rotateY(180deg);
+  padding: 5px;
+}
+
+</style>
+</head>
+<body>
+
+<!-- MAIN (Center website) -->
+<div class="main">
+
+<h1>Serveis WEB del Servidor de Centre 18.04</h1>
+<hr>
+
+<!--<h2>PORTFOLIO</h2> -->
+
+<div id="myBtnContainer">
+  <button class="btn active" onclick="filterSelection('all')"> Accés als serveis</button>
+</div>
+
+<!-- Portfolio Gallery Grid -->
+<div class="row">
+   <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4 cat1">
+      <div class="card">
+          <div class="flip-card">
+            <div class="flip-card-inner">
+              <div class="flip-card-front">
+                <img class="image" src="imatges/webmin-logo.png">
+              </div>
+              <div class="flip-card-back">
+                <h4><b>Webmin</b></h4> 
+                <br>
+                <a href="https://__IP__:10000" class="btn btn-primary">https://__IP__:10000</a>
+              </div>
+            </div>
+          </div>
+        <div class="card-body">
+          <h4 class="card-title">Gestió del servidor</h4>
+          <a href="https://__IP__:10000" class="btn btn-primary">Accés</a>
+        </div>
+      </div>
+  </div>
+  <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4 cat1">
+      <div class="card">
+          <div class="flip-card">
+            <div class="flip-card-inner">
+              <div class="flip-card-front">
+                <img class="image" src="imatges/calibre-logo.png">
+              </div>
+              <div class="flip-card-back">
+                <h4><b>Servei Calibre</b></h4> 
+                <br>
+                <a href="http://__IP__:8081" class="btn btn-primary">http://__IP__:8081</a>
+              </div>
+            </div>
+          </div>
+        <div class="card-body">
+          <h4 class="card-title">Arxiu digital</h4>
+          <a href="http://__IP__:8081" class="btn btn-primary">Accés web</a>
+	  <a href="http://__IP__:8081/mobile" class="btn btn-primary">Accés mòbil</a>
+	</div>
+      </div>
+  </div>
+  <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4 cat1">
+      <div class="card">
+          <div class="flip-card">
+            <div class="flip-card-inner">
+              <div class="flip-card-front">
+                <img class="image" src="imatges/jclic-logo.png">
+              </div>
+              <div class="flip-card-back">
+                <h4><b>Servidor d'informes JClic</b></h4>
+                <br>
+                <a href="http://__IP__:8080/reports" class="btn btn-primary">http://__IP__:8080/reports</a>
+              </div>
+            </div>
+          </div>
+        <div class="card-body">
+          <h4 class="card-title">Informes del JClic</h4>
+          <a href="http://__IP__:8080/reports" class="btn btn-primary">Accés</a>
+        </div>
+      </div>
+  </div>
+    <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4 cat1">
+      <div class="card">
+          <div class="flip-card">
+            <div class="flip-card-inner">
+              <div class="flip-card-front">
+                <img class="image" src="imatges/nextcloud-logo.png">
+              </div>
+              <div class="flip-card-back">
+                <h4><b>Nextcloud</b></h4> 
+                <br>
+                <a href="https://__IP__:10443" class="btn btn-primary">https://__IP__:10443</a>
+              </div>
+            </div>
+          </div>
+        <div class="card-body">
+          <h4 class="card-title">Servei al núvol</h4>
+          <a href="https://__IP__:10443" class="btn btn-primary">Accés</a>
+        </div>
+      </div>
+  </div>
+   <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4 cat1">
+      <div class="card">
+          <div class="flip-card">
+            <div class="flip-card-inner">
+              <div class="flip-card-front">
+                <img class="image" src="imatges/onlyoffice-logo.png">
+              </div>
+              <div class="flip-card-back">
+                <h4><b>Onlyoffice</b></h4> 
+                <br>
+                <a href="https://__IP__:10445" class="btn btn-primary">https://__IP__:10445</a>
+              </div>
+            </div>
+          </div>
+        <div class="card-body">
+          <h4 class="card-title">Paquet ofimàtic al núvol</h4>
+          <a href="https://__IP__:10445" class="btn btn-primary">Accés</a>
+        </div>
+      </div>
+  </div>
+     <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4 cat1">
+      <div class="card">
+          <div class="flip-card">
+            <div class="flip-card-inner">
+              <div class="flip-card-front">
+                <img class="image" src="imatges/fog-logo.png">
+              </div>
+              <div class="flip-card-back">
+                <h4><b>FOG</b></h4> 
+                <br>
+                <a href="http://__IP__/fog" class="btn btn-primary">http://__IP__/fog</a>
+              </div>
+            </div>
+          </div>
+        <div class="card-body">
+          <h4 class="card-title">Servei de clonació</h4>
+          <a href="http://__IP__/fog" class="btn btn-primary">Accés</a>
+        </div>
+      </div>
+  </div>
+ <!-- Categories buïdes per ajustar les capses dels diferents serveis web 
+    <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4 cat1">
+    </div>
+    <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4 cat1">
+    </div> -->
+<!-- END GRID -->
+</div>
+
+<!-- END MAIN -->
+</div>
+
+<script>
+filterSelection("all")
+function filterSelection(c) {
+  var x, i;
+  x = document.getElementsByClassName("col");
+  if (c == "all") c = "";
+  for (i = 0; i < x.length; i++) {
+    w3RemoveClass(x[i], "show");
+    if (x[i].className.indexOf(c) > -1) w3AddClass(x[i], "show");
+  }
+}
+
+function w3AddClass(element, name) {
+  var i, arr1, arr2;
+  arr1 = element.className.split(" ");
+  arr2 = name.split(" ");
+  for (i = 0; i < arr2.length; i++) {
+    if (arr1.indexOf(arr2[i]) == -1) {element.className += " " + arr2[i];}
+  }
+}
+
+function w3RemoveClass(element, name) {
+  var i, arr1, arr2;
+  arr1 = element.className.split(" ");
+  arr2 = name.split(" ");
+  for (i = 0; i < arr2.length; i++) {
+    while (arr1.indexOf(arr2[i]) > -1) {
+      arr1.splice(arr1.indexOf(arr2[i]), 1);     
+    }
+  }
+  element.className = arr1.join(" ");
+}
+
+
+// Add active class to the current button (highlight it)
+var btnContainer = document.getElementById("myBtnContainer");
+var btns = btnContainer.getElementsByClassName("btn");
+for (var i = 0; i < btns.length; i++) {
+  btns[i].addEventListener("click", function(){
+    var current = document.getElementsByClassName("active");
+    current[0].className = current[0].className.replace(" active", "");
+    this.className += " active";
+  });
+}
+</script>
+
+</body>
+</html>

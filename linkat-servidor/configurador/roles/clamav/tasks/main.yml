@@ -1,0 +1,27 @@
+---
+- name: Copiant configuració de ClamAV
+  copy: src=files/linkat-clamdscan dest=/etc/cron.daily/
+
+- name: Copiant configuració de ClamAV
+  copy: src=files/erase_trash dest=/etc/cron.weekly/
+
+- name: Copiant configuració de ClamAV
+  copy: src=files/clamd.conf dest=/etc/clamav/clamd.conf
+
+- file:
+        path: /etc/cron.daily/linkat-clamdscan
+        owner: root
+        group: root
+        mode: 0755
+
+- file:
+        path: /etc/cron.weekly/erase_trash
+        owner: root
+        group: root
+        mode: 0755
+
+- file:
+        path: /etc/clamav/clamd.conf
+        owner: root
+        group: root
+        mode: 0644

@@ -1,0 +1,36 @@
+---
+- name: Copiant fitxers de configuració FOG 
+  copy: src=files/docker.fogproject.service dest=/etc/systemd/system/
+
+- name: Copiant fitxers de configuració DNSmasq-fog
+  copy: src=files/docker.dnsmasqfog.service dest=/etc/systemd/system/
+
+- name: Copiant fitxers de configuració ServidorWeb 
+  copy: src=files/docker.servidorweb.service dest=/etc/systemd/system/
+
+  #- name: Copiant fitxers de configuració dnsmasq-fog
+  #  copy: src=files/fog.conf dest=/etc/dnsmasq.d/
+
+- file:
+        path: /etc/systemd/system/docker.fogproject.service
+        owner: root
+        group: root
+        mode: 0644
+
+- file:
+        path: /etc/systemd/system/docker.dnsmasqfog.service
+        owner: root
+        group: root
+        mode: 0644
+
+- file:
+        path: /etc/systemd/system/docker.servidorweb.service
+        owner: root
+        group: root
+        mode: 0644
+
+        #- file:
+        #path: /etc/dnsmasq.d/fog.conf
+        #owner: root
+        #group: root
+        #mode: 0644

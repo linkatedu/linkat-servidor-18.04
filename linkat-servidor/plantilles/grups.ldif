@@ -1,0 +1,35 @@
+dn: cn=Administradors,ou=Groups,dc=__DOMAIN__
+cn: Administradors
+gidNumber: 10000
+objectClass: posixGroup
+
+dn: cn=Professorat,ou=Groups,dc=__DOMAIN__
+cn: Professorat
+gidNumber: 10001
+objectClass: posixGroup
+
+dn: cn=Editors,ou=Groups,dc=__DOMAIN__
+cn: Editors
+gidNumber: 10002
+objectClass: posixGroup
+
+dn: cn=Alumnat,ou=Groups,dc=__DOMAIN__
+cn: Alumnat
+gidNumber: 10003
+objectClass: posixGroup
+
+dn: cn=Gestio,ou=Groups,dc=__DOMAIN__
+cn: Gestio
+gidNumber: 10004
+objectClass: posixGroup
+
+dn: cn=Cloudprint,ou=Groups,dc=__DOMAIN__
+cn: Cloudprint 
+gidNumber: 10005
+objectClass: posixGroup
+
+dn: cn=users,ou=Groups,dc=__DOMAIN__
+cn: users
+gidNumber: 100
+objectClass: top
+objectClass: posixGroup

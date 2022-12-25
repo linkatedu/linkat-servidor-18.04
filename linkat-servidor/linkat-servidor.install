@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DATE=`date '+%Y-%m-%d_%H:%M:%S'`
+LOGS=/var/log/linkat-servidor-$DATE.log
+
+sudo /usr/share/linkat/linkat-servidor/linkat-servidor.sh | tee $LOGS

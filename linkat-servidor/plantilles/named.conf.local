@@ -1,0 +1,20 @@
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+zone "__DOMAIN__" {
+        type master;
+        file "/etc/bind/for.domini";
+        allow-transfer { __IP__; };
+        also-notify { __IP__; };
+ };
+zone "__IP3__.__IP2__.__IP1__.in-addr.arpa" {
+        type master;
+        file "/etc/bind/rev.domini";
+        allow-transfer { __IP__; };
+        also-notify { __IP__; };
+ };

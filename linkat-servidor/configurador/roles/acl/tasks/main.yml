@@ -1,0 +1,690 @@
+---
+- name: Verificant ACL unitat P
+  acl:
+        path: /srv/exports/P
+        state: present
+        entry: "default:user::rwx"
+
+- name: Verificant ACL unitats S
+  acl:
+        path: /srv/exports/S
+        state: present
+        entry: "default:user::rwx"
+
+- name: Verificant ACL unitats T
+  acl:
+        path: /srv/exports/T
+        state: present
+        entry: "default:user::rwx"
+
+- name: Verificant ACL unitats M
+  acl:
+        path: /srv/exports/M
+        state: present
+        entry: "default:user::rwx"
+
+- name: Verificanti ACL unitats G
+  acl:
+        path: /srv/exports/G
+        state: present
+        entry: "default:user::rwx"
+
+- name: Verificant ACL unitat P
+  acl:
+        path: /srv/exports/P
+        state: present
+        entry: "default:group::rwx"
+        
+- name: Verificant ACL unitats S
+  acl:
+        path: /srv/exports/S
+        state: present
+        entry: "default:group::rwx"
+
+- name: Verificant ACL unitats T
+  acl:
+        path: /srv/exports/T
+        state: present
+        entry: "default:group::rwx"
+
+- name: Verificant ACL unitats M
+  acl:
+        path: /srv/exports/M
+        state: present
+        entry: "default:group::rwx"
+
+- name: Verificanti ACL unitats G
+  acl:
+        path: /srv/exports/G
+        state: present
+        entry: "default:group::rwx"
+
+- name: Verificant ACL Editors unitat S
+  acl:
+        path: /srv/exports/S
+        state: present
+        entry: "default:group:Editors:rwx"
+        recursive: yes
+
+- name: Verificant ACL Editors unitat S
+  acl:
+        path: /srv/exports/S
+        state: present
+        entry: "group:Editors:rwx"
+        recursive: yes
+
+- name: Verificant ACL Administradors unitat S
+  acl:
+        path: /srv/exports/S
+        state: present
+        entry: "default:group:Administradors:rwx"
+        recursive: yes
+
+- name: Verificant ACL Administradors unitat S
+  acl:
+        path: /srv/exports/S
+        state: present
+        entry: "group:Administradors:rwx"
+        recursive: yes
+
+- name: Verificant ACL Paperera P
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_P
+        state: present
+        entry: "default:group::rwx"
+        recursive: yes
+
+#- name: Verificant ACL Paperera S
+#  acl:
+#        path: /srv/exports/Paperera/Paperera_Unitat_S
+#        state: present
+#        entry: "default:group::rwx"
+#        recursive: yes
+
+- name: Verificant ACL Paperera T
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_T
+        state: present
+        entry: "default:group::rwx"
+        recursive: yes
+
+- name: Verificant ACL Paperera M
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_M
+        entry: "default:group::rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL Paperera G
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_G
+        entry: "default:group::rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL Paperera P
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_P
+        state: present
+        entry: "default:user::rwx"
+        recursive: yes
+
+#- name: Verificant ACL Paperera S
+#  acl:
+#        path: /srv/exports/Paperera/Paperera_Unitat_S
+#        state: present
+#        entry: "default:user::rwx"
+#        recursive: yes
+
+- name: Verificant ACL Paperera T
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_T
+        state: present
+        entry: "default:user::rwx"
+        recursive: yes
+
+- name: Verificant ACL Paperera M
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_M
+        entry: "default:user::rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL Paperera G
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_G
+        entry: "default:user::rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin unitat Quarantine
+  acl:
+        path: /var/quarantine
+        state: present
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+
+- name: Verificant ACL lnadmin unitat Quarantine
+  acl:
+        path: /var/quarantine
+        state: present
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+
+- name: Verificant ACL lnadmin unitats T
+  acl:
+        path: /srv/exports/T
+        state: present
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+
+- name: Verificant ACL lnadmin unitats S
+  acl:
+        path: /srv/exports/S
+        state: present
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+
+- name: Verificant ACL lnadmin unitats G
+  acl:
+        path: /srv/exports/G
+        state: present
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+
+- name: Verificant ACL lnadmin unitats M
+  acl:
+        path: /srv/exports/M
+        state: present
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+
+- name: Verificant ACL lnadmin unitats P
+  acl:
+        path: /srv/exports/P
+        state: present
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+
+- name: Verificant ACL lnadmin unitats T
+  acl:
+        path: /srv/exports/T
+        state: present
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+
+- name: Verificant ACL lnadmin unitats S
+  acl:
+        path: /srv/exports/S
+        state: present
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+
+- name: Verificant ACL lnadmin unitats G
+  acl:
+        path: /srv/exports/G
+        state: present
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+
+- name: Verificant ACL lnadmin unitats M
+  acl:
+        path: /srv/exports/M
+        state: present
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+
+- name: Verificant ACL lnadmin unitats P
+  acl:
+        path: /srv/exports/P
+        state: present
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav unitats T
+  acl:
+        path: /srv/exports/T
+        state: present
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav unitats S
+  acl:
+        path: /srv/exports/S
+        state: present
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav unitats G
+  acl:
+        path: /srv/exports/G
+        state: present
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav unitats M
+  acl:
+        path: /srv/exports/M
+        state: present
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav unitats P
+  acl:
+        path: /srv/exports/P
+        state: present
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav unitats T
+  acl:
+        path: /srv/exports/T
+        state: present
+        entry: "user:clamav:rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav unitats S
+  acl:
+        path: /srv/exports/S
+        state: present
+        entry: "user:clamav:rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav unitats G
+  acl:
+        path: /srv/exports/G
+        state: present
+        entry: "user:clamav:rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav unitats M
+  acl:
+        path: /srv/exports/M
+        state: present
+        entry: "user:clamav:rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav unitats P
+  acl:
+        path: /srv/exports/P
+        state: present
+        entry: "user:clamav:rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav Paperera T
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_T
+        state: present
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav Paperera M
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_M
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL clamav Paperera G
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_G
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL clamav Paperera P
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_P
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL clamav Paperera T
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_T
+        state: present
+        entry: "user:clamav:rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav Paperera M
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_M
+        entry: "user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL clamav Paperera G
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_G
+        entry: "user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL clamav Paperera P
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_P
+        entry: "user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin Paperera T
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_T
+        state: present
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+
+- name: Verificant ACL lnadmin Paperera M
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_M
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin Paperera G
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_G
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin Paperera P
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_P
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin Paperera T
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_T
+        state: present
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+
+- name: Verificant ACL lnadmin Paperera M
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_M
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin Paperera G
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_G
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin Paperera P
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_P
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL minidlna unitats M
+  acl:
+        path: /srv/exports/M
+        state: present
+        entry: "user:minidlna:r-x"
+        recursive: yes
+
+- name: Verificant ACL minidlna unitats M
+  acl:
+        path: /srv/exports/M
+        state: present
+        entry: "default:user:minidlna:r-x"
+        recursive: yes
+
+- name: Verificant ACL minidlna Paperera M
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_M
+        state: present
+        entry: "user:minidlna:r-x"
+        recursive: yes
+
+- name: Verificant ACL minidlna Paperera M
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_M
+        state: present
+        entry: "default:user:minidlna:r-x"
+        recursive: yes
+
+#- name: Verificant ACL lnadmin App
+#  acl:
+#        path: /srv/app
+#        entry: "default:user:lnadmin:rwx"
+#        recursive: yes
+#        state: present
+
+#- name: Verificant ACL lnadmin App
+#  acl:
+#        path: /srv/app
+#        state: present
+#        entry: "user:lnadmin:rwx"
+#        recursive: yes
+
+- name: Verificant ACL Paperera arxius
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_arxius
+        state: present
+        entry: "default:group::rwx"
+        recursive: yes
+
+- name: Verificant ACL Paperera arxius
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_arxius
+        state: present
+        entry: "default:user::rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav Paperera arxius
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_arxius
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL clamav Paperera arxius
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_arxius
+        entry: "user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin Paperera arxius
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_arxius
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin Paperera arxius
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_arxius
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL Paperera cloudprint
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_cloudprint
+        state: present
+        entry: "default:group::rwx"
+        recursive: yes
+
+- name: Verificant ACL Paperera cloudprint
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_cloudprint
+        state: present
+        entry: "default:user::rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav Paperera cloudprint
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_cloudprint
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL clamav Paperera cloudprint
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_cloudprint
+        entry: "user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin Paperera cloudprint
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_cloudprint
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin Paperera cloudprint
+  acl:
+        path: /srv/exports/Paperera/Paperera_Unitat_cloudprint
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL arxius
+  acl:
+        path: /srv/exports/arxius
+        state: present
+        entry: "default:group::rwx"
+        recursive: yes
+
+- name: Verificant ACL arxius
+  acl:
+        path: /srv/exports/arxius
+        state: present
+        entry: "default:user::rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav arxius
+  acl:
+        path: /srv/exports/arxius
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL clamav arxius
+  acl:
+        path: /srv/exports/arxius
+        entry: "user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin arxius
+  acl:
+        path: /srv/exports/arxius
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin arxius
+  acl:
+        path: /srv/exports/arxius
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL cloudprint
+  acl:
+        path: /srv/exports/cloudprint
+        state: present
+        entry: "default:group::rwx"
+        recursive: yes
+
+- name: Verificant ACL cloudprint
+  acl:
+        path: /srv/exports/cloudprint
+        state: present
+        entry: "default:user::rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav cloudprint
+  acl:
+        path: /srv/exports/cloudprint
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL clamav cloudprint
+  acl:
+        path: /srv/exports/cloudprint
+        entry: "user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin cloudprint
+  acl:
+        path: /srv/exports/cloudprint
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin cloudprint
+  acl:
+        path: /srv/exports/cloudprint
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL maquetes
+  acl:
+        path: /srv/exports/maquetes
+        state: present
+        entry: "default:group::rwx"
+        recursive: yes
+
+- name: Verificant ACL maquetes
+  acl:
+        path: /srv/exports/maquetes
+        state: present
+        entry: "default:user::rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav maquetes
+  acl:
+        path: /srv/exports/maquetes
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL clamav maquetes
+  acl:
+        path: /srv/exports/maquetes
+        entry: "user:clamav:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin maquetes
+  acl:
+        path: /srv/exports/maquetes
+        entry: "default:user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL lnadmin maquetes
+  acl:
+        path: /srv/exports/maquetes
+        entry: "user:lnadmin:rwx"
+        recursive: yes
+        state: present
+
+- name: Verificant ACL clamav unitats Calibre
+  acl:
+        path: /srv/calibre
+        state: present
+        entry: "default:user:clamav:rwx"
+        recursive: yes
+
+- name: Verificant ACL clamav unitats Calibre
+  acl:
+        path: /srv/calibre
+        state: present
+        entry: "user:clamav:rwx"
+        recursive: yes

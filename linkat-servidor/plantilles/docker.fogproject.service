@@ -1,0 +1,15 @@
+[Unit]
+Description=Fogproject Service
+After=docker.service
+Requires=docker.service
+ 
+[Service]
+TimeoutStartSec=0
+#Restart=always
+ExecStartPre=-/usr/bin/docker stop fogproject
+ExecStartPre=-/usr/bin/docker rm fogproject 
+ExecStartPre=/usr/bin/docker pull linkat/fogproject:1.0.1
+ExecStart=/usr/bin/docker run -d --restart=always --network="host" -e IP=__IP__ -e APACHE_ROOT_REDIRECTION="http://__IP__:83" -v "/srv/fog/images":"/images" -v "/srv/app/fogproject/mysql":"/var/lib/mysql" --name fogproject linkat/fogproject:1.0.3
+ 
+[Install]
+WantedBy=multi-user.target

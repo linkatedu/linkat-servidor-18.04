@@ -1,0 +1,53 @@
+---
+- name: Copiant fitxers de configuració SAMBA smb
+  copy: src=files/smb.conf dest=/etc/samba/smb.conf
+
+- name: Copiant fitxers de configuració SAMBA professorat
+  copy: src=files/professorat.conf dest=/etc/samba/smb.conf.d/
+
+- name: Copiant fitxers de configuració SAMBA programari
+  copy: src=files/programari.conf dest=/etc/samba/smb.conf.d/
+
+- name: Copiant fitxers de configuració SAMBA treball
+  copy: src=files/treball.conf dest=/etc/samba/smb.conf.d/
+
+- name: Copiant fitxers de configuració SAMBA multimèdia
+  copy: src=files/multimedia.conf dest=/etc/samba/smb.conf.d/
+
+- name: Copiant fitxers de configuració SAMBA gestió
+  copy: src=files/gestio.conf dest=/etc/samba/smb.conf.d/
+
+- name: Copiant fitxers de configuració SAMBA arxius
+  copy: src=files/arxius.conf dest=/etc/samba/smb.conf.d/
+
+- name: Copiant fitxers de configuració SAMBA maquetes
+  copy: src=files/maquetes.conf dest=/etc/samba/smb.conf.d/
+
+- name: Copiant fitxers de configuració SAMBA cloudprint
+  copy: src=files/cloudprint.conf dest=/etc/samba/smb.conf.d/
+
+- name: Copiant fitxers de configuració SAMBA smb-ldap
+  copy: src=files/smb-ldap.conf dest=/etc/samba/smb.conf.d/
+
+- name: Copiant fitxers de configuració SAMBA paperera
+  copy: src=files/paperera_xarxa.conf dest=/etc/samba/smb.conf.d/
+  
+- file:
+        path: /etc/samba/smb.conf
+        owner: root
+        group: root
+        mode: 0644
+
+- file:
+        path: /etc/samba/smb.conf.d/
+        owner: root
+        group: root
+        mode: 00655
+
+- name: Activant servei SAMBA smbd
+  service: name=smbd state=started enabled=yes
+  notify: restart smbd
+
+- name: Activant servei SAMBA nmdb
+  service: name=nmbd state=started enabled=yes
+  notify: restart nmbd
